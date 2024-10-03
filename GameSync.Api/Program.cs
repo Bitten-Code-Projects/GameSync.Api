@@ -3,6 +3,7 @@ namespace GameSync.Api;
 using System.Reflection;
 using FluentValidation;
 using GameSync.Api.Application.Examples.Interfaces;
+using GameSync.Api.Domain.Shared.Middleware;
 using GameSync.Api.Infrastructure.Examples;
 
 public class Program
@@ -38,6 +39,7 @@ public class Program
 
         app.UseAuthorization();
 
+        app.ConfigureExceptionHandler();
 
         app.MapControllers();
 
