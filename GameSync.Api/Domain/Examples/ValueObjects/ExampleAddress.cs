@@ -18,10 +18,6 @@ public class ExampleAddress : ValueObject
         HouseNumber = string.Empty,
     };
 
-    private ExampleAddress()
-    {
-    }
-
     protected override IEnumerable<object> GetEqualityComponents()
     {
         yield return Street;

@@ -28,7 +28,6 @@
   <ItemGroup>
     <Folder Include="Application\Examples\Extensions\" />
     <Folder Include="Application\Examples\Requests\" />
-    <Folder Include="Domain\Examples\Commands\" />
   </ItemGroup>
 
 </Project>

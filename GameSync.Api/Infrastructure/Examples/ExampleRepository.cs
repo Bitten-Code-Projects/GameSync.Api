@@ -13,6 +13,13 @@ public class ExampleRepository : IExampleRepository
         _exampleDbContext = exampleDbContext;
     }
 
+    public async Task<Example> CreateExample(Example example, CancellationToken cancellationToken = default)
+    {
+        var result = await _exampleDbContext.Example.AddAsync(example, cancellationToken);
+        await _exampleDbContext.SaveChangesAsync();
+        return result.Entity;
+    }
+
     public async Task<Example?> GetExampleById(long id, CancellationToken cancellationToken = default)
     {
         return await _exampleDbContext.Example.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
