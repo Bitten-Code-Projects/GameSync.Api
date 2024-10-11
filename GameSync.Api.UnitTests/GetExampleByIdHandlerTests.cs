@@ -1,10 +1,10 @@
 using AutoMapper;
 using FluentAssertions;
 using FluentValidation;
-using GameSync.Api.Application.Examples.Interfaces;
-using GameSync.Api.Application.Examples.UseCases.GetExampleById;
-using GameSync.Api.Domain.Examples.Entities;
-using GameSync.Api.Domain.Examples.ValueObjects;
+using GameSync.Application.Examples.Interfaces;
+using GameSync.Application.Examples.UseCases.GetExampleById;
+using GameSync.Domain.Examples.Entities;
+using GameSync.Domain.Examples.ValueObjects;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 

@@ -1,13 +1,13 @@
 using FluentAssertions;
-using GameSync.Api.Application.Examples.Interfaces;
-using GameSync.Api.Application.Examples.UseCases.GetExampleById;
-using GameSync.Api.Domain.Examples.Entities;
 using GameSync.Api.IntegrationTests.Utilities;
 using Microsoft.AspNetCore.Mvc.Testing;
 using NSubstitute;
-using GameSync.Api.Domain.Examples.ValueObjects;
 using NSubstitute.ReturnsExtensions;
-using GameSync.Api.Domain.Shared.Middleware.Models;
+using GameSync.Application.Examples.Interfaces;
+using GameSync.Domain.Examples.Entities;
+using GameSync.Domain.Examples.ValueObjects;
+using GameSync.Application.Examples.UseCases.GetExampleById;
+using GameSync.Api.Shared.Middleware.Models;
 
 namespace GameSync.Api.IntegrationTests;
 

@@ -2,9 +2,10 @@ namespace GameSync.Api;
 
 using System.Reflection;
 using FluentValidation;
-using GameSync.Api.Application.Examples.Interfaces;
-using GameSync.Api.Domain.Shared.Middleware;
-using GameSync.Api.Infrastructure.Examples;
+using GameSync.Api.Shared.Middleware;
+using GameSync.Application.Examples.Interfaces;
+using GameSync.Infrastructure.Examples;
+using MediatR;
 
 public class Program
 {
@@ -19,10 +20,11 @@ public class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
-        builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
-        builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+        var applicationAssembly = Assembly.Load("GameSync.Application");
+        builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(applicationAssembly));
+        builder.Services.AddValidatorsFromAssembly(applicationAssembly);
         builder.Services.AddDbContext<ExampleDbContext>();
-        builder.Services.AddAutoMapper(typeof(Program));
+        builder.Services.AddAutoMapper(applicationAssembly);
 
         builder.Services.AddScoped<IExampleRepository, ExampleRepository>();
 
