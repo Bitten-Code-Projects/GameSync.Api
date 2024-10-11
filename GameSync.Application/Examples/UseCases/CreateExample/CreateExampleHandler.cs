@@ -1,10 +1,10 @@
 ﻿using EnsureThat;
 using FluentValidation;
-using GameSync.Domain.Shared.Commands;
-using MediatR;
+using GameSync.Application.Examples.Interfaces;
 using GameSync.Domain.Examples.Entities;
 using GameSync.Domain.Examples.ValueObjects;
-using GameSync.Application.Examples.Interfaces;
+using GameSync.Domain.Shared.Commands;
+using MediatR;
 
 namespace GameSync.Application.Examples.UseCases.CreateExample;
 

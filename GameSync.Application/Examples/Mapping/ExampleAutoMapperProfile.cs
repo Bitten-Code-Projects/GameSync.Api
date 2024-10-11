@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using GameSync.Domain.Examples.Interfaces;
 using GameSync.Application.Examples.UseCases.GetExampleById;
+using GameSync.Domain.Examples.Interfaces;
 
 namespace GameSync.Application.Examples.Mapping;
 

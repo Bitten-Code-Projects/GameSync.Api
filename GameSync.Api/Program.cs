@@ -5,17 +5,23 @@ using FluentValidation;
 using GameSync.Api.Shared.Middleware;
 using GameSync.Application.Examples.Interfaces;
 using GameSync.Infrastructure.Examples;
-using MediatR;
 
+/// <summary>
+/// Main Program class.
+/// </summary>
 public class Program
 {
+    /// <summary>
+    /// Main method.
+    /// </summary>
+    /// <param name="args">Collection of start arguments.</param>
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
-
         builder.Services.AddControllers();
+
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
