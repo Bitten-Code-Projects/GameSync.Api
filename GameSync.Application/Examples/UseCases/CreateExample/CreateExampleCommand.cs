@@ -5,7 +5,7 @@ namespace GameSync.Application.Examples.UseCases.CreateExample;
 
 /// <summary>
 /// Represents a command to create an example entity.
-/// This class implements IRequest<CommandResult> for use with MediatR.
+/// This class implements IRequest with CommandResult for use with MediatR.
 /// </summary>
 public class CreateExampleCommand : IRequest<CommandResult>
 {

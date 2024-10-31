@@ -41,6 +41,7 @@ public static class ExceptionMiddlewareExtensions
                         default:
                             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                             message = $"Internal Server Error";
+
                             // todo: save error to db
                             break;
                     }

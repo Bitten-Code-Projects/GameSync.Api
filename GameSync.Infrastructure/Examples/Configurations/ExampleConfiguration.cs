@@ -4,8 +4,15 @@ using GameSync.Domain.Examples.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
+/// <summary>
+/// Configures the Entity Framework Core mapping for the Example entity.
+/// </summary>
 public class ExampleConfiguration : IEntityTypeConfiguration<Example>
 {
+    /// <summary>
+    /// Configures the mapping of the Example entity to the database.
+    /// </summary>
+    /// <param name="builder">The entity type builder used to configure the Example entity.</param>
     public void Configure(EntityTypeBuilder<Example> builder)
     {
         builder.HasKey(e => e.Id).HasName("id");
