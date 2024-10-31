@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <Folder Include="Examples\Extensions\" />
+    <Folder Include="Examples\Interfaces\" />
     <Folder Include="Examples\Requests\" />
   </ItemGroup>
 

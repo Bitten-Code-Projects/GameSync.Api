@@ -31,4 +31,14 @@ public class NotFoundException : Exception
         : base(message, innerException)
     {
     }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="NotFoundException"/> class.
+    /// </summary>
+    /// <param name="entityName">Entity name.</param>
+    /// <param name="key">Key.</param>
+    public NotFoundException(string entityName, object key)
+        : base($"{entityName} with id {key.ToString()} was not found")
+    {
+    }
 }

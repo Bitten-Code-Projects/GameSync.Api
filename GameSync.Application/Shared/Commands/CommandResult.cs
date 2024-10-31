@@ -25,9 +25,9 @@ public sealed class CommandResult
     public static CommandResult Success { get; } = new CommandResult();
 
     /// <summary>
-    /// Gets or sets command result's failure reason.
+    /// Gets command result's failure reason.
     /// </summary>
-    public string? FailureReason { get; set; }
+    public string? FailureReason { get; }
 
     /// <summary>
     /// Gets a value indicating whether result is success.
@@ -35,9 +35,9 @@ public sealed class CommandResult
     public bool IsSuccess => string.IsNullOrEmpty(FailureReason);
 
     /// <summary>
-    /// Gets or sets command result data.
+    /// Gets command result data.
     /// </summary>
-    public object? Data { get; set; }
+    public object? Data { get; }
 
     /// <summary>
     /// Returns successful command result with data.

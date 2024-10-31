@@ -8,6 +8,7 @@ public class ExampleAutoMapperProfile : Profile
 {
     public ExampleAutoMapperProfile()
     {
+        // Just an example, mapping to the properties with same name doesn't require explicit mapping. Simple CreateMap is enough
         CreateMap<IExample, GetExampleByIdResult>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
             .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))

@@ -25,7 +25,6 @@ public static class ExceptionMiddlewareExtensions
                 var contextFeature = context.Features.Get<IExceptionHandlerFeature>();
                 if (contextFeature != null)
                 {
-                    string messagePrefix = $"Path: {context.Request.Path} IP: {context.Request.HttpContext.Connection.RemoteIpAddress} Message: "; // todo: body?
                     string message = string.Empty;
                     List<string> errorsList = new List<string>();
                     switch (contextFeature.Error)
@@ -42,6 +41,7 @@ public static class ExceptionMiddlewareExtensions
                         default:
                             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                             message = $"Internal Server Error";
+                            // todo: save error to db
                             break;
                     }
 

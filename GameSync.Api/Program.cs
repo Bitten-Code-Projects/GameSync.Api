@@ -5,6 +5,7 @@ using FluentValidation;
 using GameSync.Api.Shared.Middleware;
 using GameSync.Application.Examples.Interfaces;
 using GameSync.Infrastructure.Examples;
+using Microsoft.OpenApi.Models;
 
 /// <summary>
 /// Main Program class.
@@ -24,7 +25,16 @@ public class Program
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+        //builder.Services.AddSwaggerGen();
+
+        builder.Services.AddSwaggerGen(c =>
+        {
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "GameSync", Version = "v1" });
+            //c.EnableAnnotations();
+
+            var filePath = Path.Combine(AppContext.BaseDirectory, "GameSync.Api.xml");
+            c.IncludeXmlComments(filePath);
+        });
 
         var applicationAssembly = Assembly.Load("GameSync.Application");
         builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(applicationAssembly));

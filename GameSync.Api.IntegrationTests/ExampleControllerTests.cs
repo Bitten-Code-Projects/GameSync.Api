@@ -71,7 +71,7 @@ public class ExampleControllerTests : IClassFixture<WebApplicationFactory<Progra
     }
 
     [Fact]
-    public async Task GetExample_ReturnsExample_WhenExampleDoesNotExists()
+    public async Task GetExample_NotReturnsExample_WhenExampleDoesNotExists()
     {
         // Arrange
         const long Id = 1;

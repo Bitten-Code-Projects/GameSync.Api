@@ -8,7 +8,7 @@ public interface IExampleRepository
     /// Get single example by id.
     /// </summary>
     /// <param name="id">Example id.</param>
-    /// <param name="cancellationToken">Cancellatio token.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
     Task<Example?> GetExampleById(long id, CancellationToken cancellationToken = default);
 
