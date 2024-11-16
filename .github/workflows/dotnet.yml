@@ -1,0 +1,47 @@
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup .NET Core SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Install dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - uses: actions/upload-artifact@v4
+        name: Upload artifacts
+        with:
+          name: application-binaries  
+          path: .      
+
+  unit-tests:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download application artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: application-binaries
+      - name: Run unit tests
+        run: dotnet test GameSync.Api.UnitTests/GameSync.Api.UnitTests.csproj --configuration Release --no-build
+
+  integration-tests:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download application artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: application-binaries
+      - name: Run integration tests
+        run: dotnet test GameSync.Api.IntegrationTests/GameSync.Api.IntegrationTests.csproj --configuration Release --no-build
