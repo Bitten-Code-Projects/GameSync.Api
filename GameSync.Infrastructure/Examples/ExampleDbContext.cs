@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GameSync.Infrastructure.Examples;
 
+[Obsolete("This is an example.")]
 public class ExampleDbContext : DbContext
 {
     public DbSet<Example> Example { get; set; }
