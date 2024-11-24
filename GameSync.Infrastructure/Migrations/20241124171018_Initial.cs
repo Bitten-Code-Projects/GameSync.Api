@@ -1,9 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace GameSync.Api.Migrations
+namespace GameSync.Infrastructure.Migrations
 {
     /// <inheritdoc />
     public partial class Initial : Migration
@@ -15,25 +16,21 @@ namespace GameSync.Api.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "example",
+                name: "logs",
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    name = table.Column<string>(type: "varchar(64)", maxLength: 64, nullable: false)
+                    severity = table.Column<string>(type: "varchar(32)", maxLength: 32, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    surname = table.Column<string>(type: "varchar(64)", maxLength: 64, nullable: false)
+                    data = table.Column<string>(type: "varchar(2048)", maxLength: 2048, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    street = table.Column<string>(type: "varchar(128)", maxLength: 128, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    city = table.Column<string>(type: "varchar(128)", maxLength: 128, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    housenumber = table.Column<string>(type: "varchar(64)", maxLength: 64, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    date = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "NOW()")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("id", x => x.id);
+                    table.CheckConstraint("CK_Logs_Severity", "severity IN ('Trace', 'Debug', 'Info', 'Warning', 'Error', 'Critical')");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
         }
@@ -42,7 +39,7 @@ namespace GameSync.Api.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "example");
+                name: "logs");
         }
     }
 }

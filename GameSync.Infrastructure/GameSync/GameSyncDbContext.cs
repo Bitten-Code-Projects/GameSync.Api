@@ -1,12 +1,11 @@
-﻿using GameSync.Domain.Examples.Entities;
-using GameSync.Infrastructure.Examples.Configurations;
+﻿using GameSync.Domain.GameSync.Entities;
+using GameSync.Infrastructure.GameSync.Configurations;
 using Microsoft.EntityFrameworkCore;
 
-namespace GameSync.Infrastructure.Examples;
-
-public class ExampleDbContext : DbContext
+namespace GameSync.Infrastructure.GameSync;
+public class GameSyncDbContext : DbContext
 {
-    public DbSet<Example> Example { get; set; }
+    public DbSet<LogEntity> Logs { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -19,6 +18,6 @@ public class ExampleDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfiguration(new ExampleConfiguration());
+        modelBuilder.ApplyConfiguration(new LogsConfiguration());
     }
 }

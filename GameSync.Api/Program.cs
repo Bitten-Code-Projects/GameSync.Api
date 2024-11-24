@@ -4,7 +4,8 @@ using System.Reflection;
 using FluentValidation;
 using GameSync.Api.Shared.Middleware;
 using GameSync.Application.Examples.Interfaces;
-using GameSync.Infrastructure.Examples;
+using GameSync.Domain.GameSync.Interfaces;
+using GameSync.Infrastructure.GameSync;
 using Microsoft.OpenApi.Models;
 
 /// <summary>
@@ -38,10 +39,10 @@ public class Program
         var applicationAssembly = Assembly.Load("GameSync.Application");
         builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(applicationAssembly));
         builder.Services.AddValidatorsFromAssembly(applicationAssembly);
-        builder.Services.AddDbContext<ExampleDbContext>();
+        builder.Services.AddDbContext<GameSyncDbContext>();
         builder.Services.AddAutoMapper(applicationAssembly);
 
-        builder.Services.AddScoped<IExampleRepository, ExampleRepository>();
+        builder.Services.AddScoped<IGameSyncRepository, GameSyncRepository>();
 
         var app = builder.Build();
 
