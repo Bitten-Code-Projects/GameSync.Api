@@ -69,18 +69,14 @@ public class Program
         builder.Services.AddDbContext<AppDbContext>();
         builder.Services.AddAutoMapper(applicationAssembly);
 
-        builder.Services.AddIdentityApiEndpoints<User>((options) =>
-        {
-            options.User.RequireUniqueEmail = false;
-            options.SignIn.RequireConfirmedEmail = false;
-        }).AddEntityFrameworkStores<AppDbContext>();
+        builder.Services.AddIdentityApiEndpoints<ApplicationUser>().AddEntityFrameworkStores<AppDbContext>();
         builder.Services.AddAuthorization();
 
         builder.Services.AddScoped<IExampleRepository, ExampleRepository>();
 
         var app = builder.Build();
 
-        app.MapGroup("/account").MapIdentityApi<User>();
+        app.MapGroup("/account").MapIdentityApi<ApplicationUser>();
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
