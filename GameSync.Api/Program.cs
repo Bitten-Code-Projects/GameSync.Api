@@ -3,11 +3,8 @@ namespace GameSync.Api;
 using System.Reflection;
 using FluentValidation;
 using GameSync.Api.Shared.Middleware;
-using GameSync.Application.Examples.Interfaces;
 using GameSync.Infrastructure.Context;
 using GameSync.Infrastructure.Context.Models;
-using GameSync.Infrastructure.Examples;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
 
 /// <summary>
@@ -65,14 +62,11 @@ public class Program
         var applicationAssembly = Assembly.Load("GameSync.Application");
         builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(applicationAssembly));
         builder.Services.AddValidatorsFromAssembly(applicationAssembly);
-        builder.Services.AddDbContext<ExampleDbContext>();
         builder.Services.AddDbContext<AppDbContext>();
         builder.Services.AddAutoMapper(applicationAssembly);
 
         builder.Services.AddIdentityApiEndpoints<ApplicationUser>().AddEntityFrameworkStores<AppDbContext>();
         builder.Services.AddAuthorization();
-
-        builder.Services.AddScoped<IExampleRepository, ExampleRepository>();
 
         var app = builder.Build();
 
