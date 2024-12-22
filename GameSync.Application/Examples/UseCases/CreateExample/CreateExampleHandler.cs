@@ -1,6 +1,5 @@
 ﻿using EnsureThat;
 using FluentValidation;
-using GameSync.Application.Examples.Interfaces;
 using GameSync.Domain.Examples.Entities;
 using GameSync.Domain.Examples.ValueObjects;
 using GameSync.Domain.Shared.Commands;
@@ -11,12 +10,10 @@ namespace GameSync.Application.Examples.UseCases.CreateExample;
 public class CreateExampleHandler : IRequestHandler<CreateExampleCommand, CommandResult>
 {
     private readonly IValidator<CreateExampleCommand> _validator;
-    private readonly IExampleRepository _exampleRepository;
 
-    public CreateExampleHandler(IValidator<CreateExampleCommand> validator, IExampleRepository exampleRepository)
+    public CreateExampleHandler(IValidator<CreateExampleCommand> validator)
     {
         _validator = validator;
-        _exampleRepository = exampleRepository;
     }
 
     public async Task<CommandResult> Handle(CreateExampleCommand command, CancellationToken cancellationToken)
@@ -38,8 +35,6 @@ public class CreateExampleHandler : IRequestHandler<CreateExampleCommand, Comman
             },
         };
 
-        var result = await _exampleRepository.CreateExample(example, cancellationToken);
-
-        return CommandResult.SuccessWithData(result.Id);
+        return CommandResult.Success;
     }
 }

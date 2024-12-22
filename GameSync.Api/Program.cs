@@ -3,10 +3,11 @@ namespace GameSync.Api;
 using System.Reflection;
 using FluentValidation;
 using GameSync.Api.Shared.Middleware;
-using GameSync.Application.Examples.Interfaces;
 using GameSync.Domain.GameSync.Interfaces;
 using GameSync.Infrastructure.GameSync;
 using Microsoft.OpenApi.Models;
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Logs;
 
 /// <summary>
 /// Main Program class.
@@ -20,6 +21,14 @@ public class Program
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+
+        builder.Logging.ClearProviders();
+        builder.Logging.AddOpenTelemetry(x => x.AddOtlpExporter(y =>
+        {
+            y.Endpoint = new Uri("http://localhost:5341/ingest/otlp/v1/logs"); // Just for testing purposes
+            y.Protocol = OtlpExportProtocol.HttpProtobuf;
+            y.Headers = $"X-Seq-ApiKey={Environment.GetEnvironmentVariable("SEQ_API_KEY")}";
+        }));
 
         // Add services to the container.
         builder.Services.AddControllers();

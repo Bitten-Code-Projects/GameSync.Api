@@ -13,13 +13,15 @@ using Microsoft.AspNetCore.Mvc;
 public class ExampleController : ControllerBase
 {
     private readonly IMediator _mediator;
+    private readonly ILogger<ExampleController> _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ExampleController"/> class.
     /// </summary>
     /// <param name="mediator">The mediator instance for handling requests.</param>
-    public ExampleController(IMediator mediator)
+    public ExampleController(IMediator mediator, ILogger<ExampleController> logger)
     {
+        _logger = logger;
         _mediator = mediator;
     }
 
@@ -32,6 +34,7 @@ public class ExampleController : ControllerBase
     [HttpGet("{id}", Name = "GetExample")]
     public async Task<IActionResult> GetExampleById(long id, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Getting example by id: {id}", id);
         var query = new GetExampleByIdQuery
         {
             Id = id,
