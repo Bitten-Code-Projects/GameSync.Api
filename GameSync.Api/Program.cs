@@ -80,7 +80,8 @@ public class Program
 
         app.UseAuthorization();
 
-        app.ConfigureExceptionHandler();
+        var logger = app.Services.GetRequiredService<ILogger<Program>>();
+        app.ConfigureExceptionHandler(logger);
 
         app.MapControllers();
 
