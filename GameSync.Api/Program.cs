@@ -25,7 +25,7 @@ public class Program
         builder.Logging.ClearProviders();
         builder.Logging.AddOpenTelemetry(x => x.AddOtlpExporter(y =>
         {
-            y.Endpoint = new Uri("http://localhost:5341/ingest/otlp/v1/logs"); // Just for testing purposes
+            y.Endpoint = new Uri(Environment.GetEnvironmentVariable("SEQ_API_URL") !); // Just for testing purposes
             y.Protocol = OtlpExportProtocol.HttpProtobuf;
             y.Headers = $"X-Seq-ApiKey={Environment.GetEnvironmentVariable("SEQ_API_KEY")}";
         }));
