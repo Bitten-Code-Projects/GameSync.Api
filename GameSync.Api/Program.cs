@@ -8,6 +8,7 @@ using GameSync.Infrastructure.GameSync;
 using Microsoft.OpenApi.Models;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
+using OpenTelemetry.Resources;
 
 /// <summary>
 /// Main Program class.
@@ -25,6 +26,19 @@ public class Program
         builder.Logging.ClearProviders();
         builder.Logging.AddOpenTelemetry(x => x.AddOtlpExporter(y =>
         {
+            x.SetResourceBuilder(ResourceBuilder.CreateEmpty()
+                .AddService("GameSync.Api")
+                .AddTelemetrySdk()
+                .AddEnvironmentVariableDetector()
+                .AddAttributes(new Dictionary<string, object>
+                {
+                    ["host.type"] = Environment.MachineName,
+                    ["deployment.environment"] = builder.Environment.EnvironmentName,
+                }));
+
+            x.IncludeScopes = true;
+            x.IncludeFormattedMessage = true;
+
             y.Endpoint = new Uri(Environment.GetEnvironmentVariable("SEQ_API_URL") !); // Just for testing purposes
             y.Protocol = OtlpExportProtocol.HttpProtobuf;
             y.Headers = $"X-Seq-ApiKey={Environment.GetEnvironmentVariable("SEQ_API_KEY")}";
