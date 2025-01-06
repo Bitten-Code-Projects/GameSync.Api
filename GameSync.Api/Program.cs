@@ -44,19 +44,19 @@ public class Program
             opt.IncludeXmlComments(filePath);
 
             opt.AddSecurityRequirement(new OpenApiSecurityRequirement
-        {
             {
-                new OpenApiSecurityScheme
                 {
-                    Reference = new OpenApiReference
+                    new OpenApiSecurityScheme
                     {
-                        Type = ReferenceType.SecurityScheme,
-                        Id = "Bearer",
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer",
+                        },
                     },
+                    new string[] { }
                 },
-                new string[] { }
-            },
-        });
+            });
         });
 
         var applicationAssembly = Assembly.Load("GameSync.Application");

@@ -27,7 +27,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     /// <param name="optionsBuilder">The <see cref="DbContextOptionsBuilder"/> used to configure the context.</param>
     /// <remarks>
     /// This method checks whether the <see cref="DbContextOptionsBuilder"/> has already been configured.
-    /// If not, it retrieves the connection string from an environment variable (named "gameSyncConnString") or uses
+    /// If not, it retrieves the connection string from an environment variable (named "GAMESYNC_CONNECTIONSTRING") or uses
     /// a default connection string if the environment variable is not set. The connection string is then used to configure
     /// the context to connect to a MySQL database.
     /// </remarks>
@@ -35,7 +35,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     {
         if (!optionsBuilder.IsConfigured)
         {
-            string connString = Environment.GetEnvironmentVariable("gameSyncConnString") ??
+            string connString = Environment.GetEnvironmentVariable("GAMESYNC_CONNECTIONSTRING") ??
                                 "server=127.0.0.1;database=GameSync;user=root;password=example;";
 
             optionsBuilder.UseMySql(connString, ServerVersion.AutoDetect(connString));

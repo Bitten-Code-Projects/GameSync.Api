@@ -20,7 +20,7 @@ public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
 
         // Retrieve the connection string from environment variables
         // or use a default value if the variable is not set.
-        string connString = Environment.GetEnvironmentVariable("gameSyncConnString") ??
+        string connString = Environment.GetEnvironmentVariable("GAMESYNC_CONNECTIONSTRING") ??
                             "server=127.0.0.1;database=GameSync;user=root;password=example;";
 
         // Configure the context to use MySQL with the detected server version
