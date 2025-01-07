@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GameSync.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241124144330_InitialMigrationWithIdentity")]
-    partial class InitialMigrationWithIdentity
+    [Migration("20250107193117_InitialWithIdentity")]
+    partial class InitialWithIdentity
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -45,7 +45,9 @@ namespace GameSync.Infrastructure.Migrations
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("LastIP")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(64)
+                        .HasColumnType("varchar(64)")
+                        .HasColumnName("LastIP");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("tinyint(1)");

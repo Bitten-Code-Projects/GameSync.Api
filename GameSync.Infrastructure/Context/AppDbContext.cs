@@ -54,6 +54,11 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
         // Apply default Identity configurations
         base.OnModelCreating(modelBuilder);
 
+        modelBuilder.Entity<ApplicationUser>()
+            .Property(au => au.LastIP)
+            .HasMaxLength(64)
+            .HasColumnName("LastIP");
+
         // Add additional custom configurations here if needed
     }
 }

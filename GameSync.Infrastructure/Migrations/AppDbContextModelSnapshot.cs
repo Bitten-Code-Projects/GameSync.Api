@@ -42,7 +42,9 @@ namespace GameSync.Infrastructure.Migrations
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("LastIP")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(64)
+                        .HasColumnType("varchar(64)")
+                        .HasColumnName("LastIP");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("tinyint(1)");
