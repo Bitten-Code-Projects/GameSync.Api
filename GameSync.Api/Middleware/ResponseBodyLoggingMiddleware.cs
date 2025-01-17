@@ -28,7 +28,7 @@ public class ResponseBodyLoggingMiddleware
     /// <param name="context">The http context processed by middleware.</param>
     /// <param name="options">The options snapshot. Lets configuring during runtime.</param>
     /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-    public async Task Invoke(HttpContext context, IOptionsSnapshot<FeatureFlags> options)
+    public async Task InvokeAsync(HttpContext context, IOptionsSnapshot<FeatureFlags> options)
     {
         if (!options.Value.EnableRequestLogging)
         {
@@ -38,41 +38,20 @@ public class ResponseBodyLoggingMiddleware
 
         var originalBodyStream = context.Response.Body;
 
-        try
+        // Continue down the pipeline
+        await _next(context);
+
+        // Read the response body from the memory stream
+        originalBodyStream.Position = 0;
+        var responseBody = await new StreamReader(originalBodyStream).ReadToEndAsync();
+
+        if (!string.IsNullOrEmpty(responseBody))
         {
-            // Create a new memory stream to hold the response
-            using (var memoryStream = new MemoryStream())
-            {
-                // Set the response body to our memory stream
-                context.Response.Body = memoryStream;
-
-                // Continue down the pipeline
-                await _next(context);
-
-                // Read the response body from the memory stream
-                memoryStream.Position = 0;
-                var responseBody = await new StreamReader(memoryStream).ReadToEndAsync();
-
-                if (!string.IsNullOrEmpty(responseBody))
-                {
-                    _logger.LogInformation($"Raw request response: {responseBody}");
-                }
-
-                // Clear the memory stream
-                memoryStream.SetLength(0);
-
-                // Reset the position to read from the beginning
-                memoryStream.Position = 0;
-
-                // Copy the modified response to the original stream
-                await memoryStream.CopyToAsync(originalBodyStream);
-            }
+            _logger.LogInformation($"Raw request response: {responseBody}");
         }
-        finally
-        {
-            // Restore the original stream
-            context.Response.Body = originalBodyStream;
-        }
+
+        // Reset the position to read from the beginning
+        originalBodyStream.Position = 0;
     }
 }
 
