@@ -3,10 +3,9 @@ namespace GameSync.Api;
 using System.Reflection;
 using FluentValidation;
 using GameSync.Api.Middleware;
-using GameSync.Api.Middleware.Models;
 using GameSync.Api.Shared.Middleware;
-using GameSync.Domain.GameSync.Interfaces;
-using GameSync.Infrastructure.GameSync;
+using GameSync.Infrastructure.Context;
+using GameSync.Infrastructure.Context.Models;
 using Microsoft.OpenApi.Models;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
@@ -53,25 +52,50 @@ public class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
-        builder.Services.AddSwaggerGen(c =>
+        builder.Services.AddSwaggerGen(opt =>
         {
-            c.SwaggerDoc("v1", new OpenApiInfo { Title = "GameSync", Version = "v1" });
+            opt.SwaggerDoc("v1", new OpenApiInfo { Title = "GameSync", Version = "v1" });
+            opt.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                In = ParameterLocation.Header,
+                Description = "Please enter token",
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
+                BearerFormat = "JWT",
+                Scheme = "bearer",
+            });
 
             var filePath = Path.Combine(AppContext.BaseDirectory, "GameSync.Api.xml");
-            c.IncludeXmlComments(filePath);
+            opt.IncludeXmlComments(filePath);
+
+            opt.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer",
+                        },
+                    },
+                    new string[] { }
+                },
+            });
         });
 
         var applicationAssembly = Assembly.Load("GameSync.Application");
         builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(applicationAssembly));
         builder.Services.AddValidatorsFromAssembly(applicationAssembly);
-        builder.Services.AddDbContext<GameSyncDbContext>();
+        builder.Services.AddDbContext<AppDbContext>();
         builder.Services.AddAutoMapper(applicationAssembly);
 
-        builder.Services.AddScoped<IGameSyncRepository, GameSyncRepository>();
-
-        builder.Services.Configure<FeatureFlags>(builder.Configuration.GetSection("FeatureFlags"));
+        builder.Services.AddIdentityApiEndpoints<ApplicationUser>().AddEntityFrameworkStores<AppDbContext>();
+        builder.Services.AddAuthorization();
 
         var app = builder.Build();
+
+        app.MapGroup("/account").MapIdentityApi<ApplicationUser>();
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
