@@ -2,6 +2,8 @@ namespace GameSync.Api;
 
 using System.Reflection;
 using FluentValidation;
+using GameSync.Api.Middleware;
+using GameSync.Api.Middleware.Models;
 using GameSync.Api.Shared.Middleware;
 using GameSync.Domain.GameSync.Interfaces;
 using GameSync.Infrastructure.GameSync;
@@ -67,6 +69,8 @@ public class Program
 
         builder.Services.AddScoped<IGameSyncRepository, GameSyncRepository>();
 
+        builder.Services.Configure<FeatureFlags>(builder.Configuration.GetSection("FeatureFlags"));
+
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
@@ -78,10 +82,13 @@ public class Program
 
         app.UseHttpsRedirection();
 
-        app.UseAuthorization();
-
         var logger = app.Services.GetRequiredService<ILogger<Program>>();
         app.ConfigureExceptionHandler(logger);
+
+        app.UseRequestBodyLogging();
+        app.UseResponseBodyMiddleware();
+
+        app.UseAuthorization();
 
         app.MapControllers();
 
