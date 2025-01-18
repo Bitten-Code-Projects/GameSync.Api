@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using GameSync.Api.Middleware.Models;
+using GameSync.Api.Utilities;
 using Microsoft.Extensions.Options;
 
 namespace GameSync.Api.Middleware;
@@ -40,7 +41,7 @@ public class RequestBodyLoggingMiddleware
         // Enable buffering so the body can be read multiple times
         context.Request.EnableBuffering();
 
-        _logger.LogInformation($"Raw request path: {context.Request.Method} {context.Request.Path}{context.Request.QueryString}");
+        _logger.LogInformation($"Raw request path: {context.Request.Method} {context.Request.Path}{context.Request.QueryString}".LogsSanitize());
 
         // Read the request body
         using var requestStreamReader = new StreamReader(
@@ -54,7 +55,7 @@ public class RequestBodyLoggingMiddleware
         // Log or process the raw body as needed
         if (!string.IsNullOrEmpty(rawRequestBody))
         {
-            _logger.LogInformation($"Raw request body: {rawRequestBody}");
+            _logger.LogInformation($"Raw request body: {rawRequestBody}".LogsSanitize());
         }
 
         // IMPORTANT: Reset the request body position for other middleware and controllers

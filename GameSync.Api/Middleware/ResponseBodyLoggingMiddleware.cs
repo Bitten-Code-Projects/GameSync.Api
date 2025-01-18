@@ -1,4 +1,5 @@
 ﻿using GameSync.Api.Middleware.Models;
+using GameSync.Api.Utilities;
 using Microsoft.Extensions.Options;
 
 namespace GameSync.Api.Middleware;
@@ -47,7 +48,7 @@ public class ResponseBodyLoggingMiddleware
 
         if (!string.IsNullOrEmpty(responseBody))
         {
-            _logger.LogInformation($"Raw request response: {responseBody}");
+            _logger.LogInformation($"Raw request response: {responseBody}".LogsSanitize());
         }
 
         // Reset the position to read from the beginning
