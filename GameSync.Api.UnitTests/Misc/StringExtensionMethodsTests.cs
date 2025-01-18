@@ -1,4 +1,5 @@
 ﻿using GameSync.Api.Utilities;
+using Shouldly;
 
 namespace GameSync.Api.UnitTests.Misc;
 
@@ -14,7 +15,7 @@ public class StringExtensionMethodsTests
         var result = input!.LogsSanitize();
 
         // Assert
-        Assert.Null(result);
+        result.ShouldBeNull();
     }
 
     [Fact]
@@ -27,7 +28,7 @@ public class StringExtensionMethodsTests
         var result = input.LogsSanitize();
 
         // Assert
-        Assert.Equal(string.Empty, result);
+        result.ShouldBeEmpty();
     }
 
     [Fact]
@@ -40,7 +41,7 @@ public class StringExtensionMethodsTests
         var result = input.LogsSanitize();
 
         // Assert
-        Assert.Equal("{\"password\":\"***\"}", result);
+        result.ShouldBe("{\"password\":\"***\"}");
     }
 
     [Fact]
@@ -53,7 +54,7 @@ public class StringExtensionMethodsTests
         var result = input.LogsSanitize();
 
         // Assert
-        Assert.Equal("{\"password\":\"***\",\"newPassword\":\"***\"}", result);
+        result.ShouldBe("{\"password\":\"***\",\"newPassword\":\"***\"}");
     }
 
     [Fact]
@@ -66,7 +67,7 @@ public class StringExtensionMethodsTests
         var result = input.LogsSanitize();
 
         // Assert
-        Assert.Equal("{\"password\":\"***\",\"username\":\"john\"}", result);
+        result.ShouldBe("{\"password\":\"***\",\"username\":\"john\"}");
     }
 
     [Fact]
@@ -79,7 +80,7 @@ public class StringExtensionMethodsTests
         var result = input.LogsSanitize();
 
         // Assert
-        Assert.Equal("{\"password\":\"***\"}", result);
+        result.ShouldBe("{\"password\":\"***\"}");
     }
 
     [Fact]
@@ -92,7 +93,7 @@ public class StringExtensionMethodsTests
         var result = input.LogsSanitize();
 
         // Assert
-        Assert.Equal("{\"username\":\"john\"}", result);
+        result.ShouldBe("{\"username\":\"john\"}");
     }
 
     [Fact]
@@ -105,7 +106,7 @@ public class StringExtensionMethodsTests
         var result = input.LogsSanitize();
 
         // Assert
-        Assert.Equal("{\"password\":\"***\"}", result);
+        result.ShouldBe("{\"password\":\"***\"}");
     }
 
     [Fact]
@@ -118,7 +119,7 @@ public class StringExtensionMethodsTests
         var result = input.LogsSanitize();
 
         // Assert
-        Assert.Equal("{\"password\":\"***\"}", result);
+        result.ShouldBe("{\"password\":\"***\"}");
     }
 
     [Theory]
@@ -132,6 +133,6 @@ public class StringExtensionMethodsTests
         var result = input.LogsSanitize();
 
         // Assert
-        Assert.Equal(expected, result);
+        result.ShouldBe(expected);
     }
 }
