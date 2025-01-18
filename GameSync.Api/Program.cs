@@ -40,7 +40,7 @@ public class Program
             x.IncludeScopes = true;
             x.IncludeFormattedMessage = true;
 
-            y.Endpoint = new Uri(Environment.GetEnvironmentVariable("SEQ_API_URL") !); // Just for testing purposes
+            y.Endpoint = new Uri(Environment.GetEnvironmentVariable("SEQ_API_URL") !);
             y.Protocol = OtlpExportProtocol.HttpProtobuf;
             y.Headers = $"X-Seq-ApiKey={Environment.GetEnvironmentVariable("SEQ_API_KEY")}";
         }));
