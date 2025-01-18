@@ -1,5 +1,6 @@
 ﻿using GameSync.Api.Middleware;
 using GameSync.Api.Middleware.Models;
+using GameSync.Api.Utilities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Logging;
@@ -10,7 +11,6 @@ namespace GameSync.Api.IntegrationTests.Global.Middleware;
 
 public class RequestBodyLoggingMiddlewareTests : IClassFixture<WebApplicationFactory<Program>>
 {
-    private readonly WebApplicationFactory<Program> _factory;
     private readonly IOptionsSnapshot<FeatureFlags> _snapshot = Substitute.For<IOptionsSnapshot<FeatureFlags>>();
     private readonly ILogger<RequestBodyLoggingMiddleware> _logger = Substitute.For<ILogger<RequestBodyLoggingMiddleware>>();
 
@@ -66,7 +66,7 @@ public class RequestBodyLoggingMiddlewareTests : IClassFixture<WebApplicationFac
         await middleware.InvokeAsync(context, _snapshot);
 
         // Assert
-        _logger.Received().Log(LogLevel.Information, $"Raw request path: {context.Request.Method} {context.Request.Path}{context.Request.QueryString}");
+        _logger.Received().Log(LogLevel.Information, $"Raw request path: {context.Request.Method} {context.Request.Path}{context.Request.QueryString}".LogsSanitize());
     }
 
     [Fact]
@@ -85,7 +85,7 @@ public class RequestBodyLoggingMiddlewareTests : IClassFixture<WebApplicationFac
         await middleware.InvokeAsync(context, _snapshot);
 
         // Assert
-        _logger.Received().Log(LogLevel.Information, $"Raw request body: {TestBody}");
+        _logger.Received().Log(LogLevel.Information, $"Raw request body: {TestBody}".LogsSanitize());
     }
 
     [Fact]
