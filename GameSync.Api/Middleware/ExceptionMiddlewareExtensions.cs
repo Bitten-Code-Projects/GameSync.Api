@@ -48,6 +48,7 @@ public static class ExceptionMiddlewareExtensions
                             context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
                             message = "Validation errors";
                             errorsList = ex.Errors.Select(x => x.ErrorMessage).ToList();
+
                             // todo: prevent validation exception logging as an error
                             break;
                         default:
