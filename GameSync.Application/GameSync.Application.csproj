@@ -13,7 +13,9 @@
   <ItemGroup>
     <Folder Include="Examples\Extensions\" />
     <Folder Include="Examples\Interfaces\" />
+    <Folder Include="Examples\Mapping\" />
     <Folder Include="Examples\Requests\" />
+    <Folder Include="Examples\UseCases\" />
   </ItemGroup>
 
   <ItemGroup>

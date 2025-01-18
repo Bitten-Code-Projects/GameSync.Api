@@ -12,10 +12,21 @@ namespace GameSync.Api.Shared.Middleware;
 public static class ExceptionMiddlewareExtensions
 {
     /// <summary>
+    /// Warning status codes.
+    /// </summary>
+    private readonly static int[] WarningStatusCodes = [400];
+
+    /// <summary>
+    /// Error status codes.
+    /// </summary>
+    private readonly static int[] ErrorStatusCodes = [500];
+
+    /// <summary>
     /// Configuration of exception middleware.
     /// </summary>
     /// <param name="app">Application builder.</param>
-    public static void ConfigureExceptionHandler(this IApplicationBuilder app)
+    /// <param name="logger">Logger provider.</param>
+    public static void ConfigureExceptionHandler(this IApplicationBuilder app, ILogger<Program> logger)
     {
         app.UseExceptionHandler(appError =>
         {
@@ -37,13 +48,30 @@ public static class ExceptionMiddlewareExtensions
                             context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
                             message = "Validation errors";
                             errorsList = ex.Errors.Select(x => x.ErrorMessage).ToList();
+
+                            // todo: prevent validation exception logging as an error
                             break;
                         default:
                             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                             message = $"Internal Server Error";
-
-                            // todo: save error to db
                             break;
+                    }
+
+                    if (WarningStatusCodes.Any(x => x == context.Response.StatusCode))
+                    {
+                        logger.LogWarning("Returned {HttpCode} with message: {Message}", context.Response.StatusCode, message);
+                        if (errorsList.Any())
+                        {
+                            logger.LogWarning("Validation errors: {ValidationErrors}", string.Join(", ", errorsList));
+                        }
+                    }
+                    else if (ErrorStatusCodes.Any(x => x == context.Response.StatusCode))
+                    {
+                        logger.LogError("Returned {HttpCode} with message: {Message} {ExceptionMessage} {StackTrace}", context.Response.StatusCode, message, contextFeature.Error.Message, contextFeature.Error.StackTrace);
+                    }
+                    else
+                    {
+                        logger.LogInformation("Returned {HttpCode} with message: {Message}", context.Response.StatusCode, message);
                     }
 
                     await context.Response.WriteAsync(new ErrorDetails()

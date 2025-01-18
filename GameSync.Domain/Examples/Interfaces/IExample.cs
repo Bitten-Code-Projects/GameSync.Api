@@ -1,7 +1,7 @@
 ﻿namespace GameSync.Domain.Examples.Interfaces;
 
-using GameSync.Domain.Examples.ValueObjects;
-using GameSync.Domain.Shared.Interfaces;
+using global::GameSync.Domain.Examples.ValueObjects;
+using global::GameSync.Domain.Shared.Interfaces;
 
 /// <summary>
 /// Represents an example entity in the GameSync domain.
