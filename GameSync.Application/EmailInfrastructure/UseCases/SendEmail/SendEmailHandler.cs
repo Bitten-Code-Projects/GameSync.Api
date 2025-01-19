@@ -59,6 +59,7 @@ public class SendEmailHandler : IRequestHandler<SendEmailCommand, CommandResult>
 
             using (var smtpClient = new SmtpClient())
             {
+                smtpClient.CheckCertificateRevocation = false;
                 smtpClient.Connect(emailSettings!.SmtpServer, emailSettings!.SmtpPort, MailKit.Security.SecureSocketOptions.StartTlsWhenAvailable);
                 smtpClient.Authenticate(emailSettings!.AuthLogin, emailSettings!.Password);
 
