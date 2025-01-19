@@ -20,6 +20,11 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        var configuration = new ConfigurationBuilder()
+        .SetBasePath(Directory.GetCurrentDirectory())
+        .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+        .Build();
+
         // Add services to the container.
         builder.Services.AddControllers();
 
