@@ -2,10 +2,14 @@ namespace GameSync.Api;
 
 using System.Reflection;
 using FluentValidation;
+using GameSync.Api.Middleware;
 using GameSync.Api.Shared.Middleware;
 using GameSync.Infrastructure.Context;
 using GameSync.Infrastructure.Context.Models;
 using Microsoft.OpenApi.Models;
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Resources;
 
 /// <summary>
 /// Main Program class.
@@ -19,6 +23,27 @@ public class Program
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+
+        builder.Logging.ClearProviders();
+        builder.Logging.AddOpenTelemetry(x => x.AddOtlpExporter(y =>
+        {
+            x.SetResourceBuilder(ResourceBuilder.CreateEmpty()
+                .AddService("GameSync.Api")
+                .AddTelemetrySdk()
+                .AddEnvironmentVariableDetector()
+                .AddAttributes(new Dictionary<string, object>
+                {
+                    ["host.type"] = Environment.MachineName,
+                    ["deployment.environment"] = builder.Environment.EnvironmentName,
+                }));
+
+            x.IncludeScopes = true;
+            x.IncludeFormattedMessage = true;
+
+            y.Endpoint = new Uri(Environment.GetEnvironmentVariable("SEQ_API_URL") !);
+            y.Protocol = OtlpExportProtocol.HttpProtobuf;
+            y.Headers = $"X-Seq-ApiKey={Environment.GetEnvironmentVariable("SEQ_API_KEY")}";
+        }));
 
         // Add services to the container.
         builder.Services.AddControllers();
@@ -81,9 +106,13 @@ public class Program
 
         app.UseHttpsRedirection();
 
-        app.UseAuthorization();
+        var logger = app.Services.GetRequiredService<ILogger<Program>>();
+        app.ConfigureExceptionHandler(logger);
 
-        app.ConfigureExceptionHandler();
+        app.UseRequestBodyLogging();
+        app.UseResponseBodyMiddleware();
+
+        app.UseAuthorization();
 
         app.MapControllers();
 
