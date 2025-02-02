@@ -1,5 +1,6 @@
 using EnsureThat;
 using FluentValidation;
+using FluentValidation.Results;
 using GameSync.Domain.Shared.Commands;
 using MailKit.Net.Smtp;
 using Microsoft.Extensions.Configuration;
@@ -41,7 +42,13 @@ public class EmailService : IEmailService
     {
         Ensure.That(command).IsNotNull();
 
-        await _validator.ValidateAndThrowAsync(command, cancellationToken);
+        ValidationResult validationResult = await _validator.ValidateAsync(command, cancellationToken);
+
+        if (!validationResult.IsValid)
+        {
+            var errorMessages = string.Join("; ", validationResult.Errors.Select(e => e.ErrorMessage));
+            return CommandResult.Fail(errorMessages);
+        }
 
         var emailSettings = _configuration.GetSection("EmailSettings").Get<EmailSettings>();
 
