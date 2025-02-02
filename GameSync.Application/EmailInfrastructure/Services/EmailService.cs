@@ -14,16 +14,19 @@ public class EmailService : IEmailService
 {
     private readonly IConfiguration _configuration;
     private readonly IValidator<SendEmailCommand> _validator;
+    private readonly string _emailPassword;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EmailService"/> class.
     /// </summary>
     /// <param name="configuration">The application configuration.</param>
     /// <param name="validator">The validator for the email command.</param>
-    public EmailService(IConfiguration configuration, IValidator<SendEmailCommand> validator)
+    /// <param name="emailPassword">Password to login in email account.</param>
+    public EmailService(IConfiguration configuration, IValidator<SendEmailCommand> validator, string emailPassword)
     {
         _configuration = configuration;
         _validator = validator;
+        _emailPassword = emailPassword;
     }
 
     /// <summary>
@@ -55,7 +58,7 @@ public class EmailService : IEmailService
         {
             smtpClient.CheckCertificateRevocation = false;
             smtpClient.Connect(emailSettings!.SmtpServer, emailSettings!.SmtpPort, MailKit.Security.SecureSocketOptions.StartTlsWhenAvailable);
-            smtpClient.Authenticate(emailSettings!.AuthLogin, emailSettings!.Password);
+            smtpClient.Authenticate(emailSettings!.AuthLogin, _emailPassword);
 
             await smtpClient.SendAsync(email, cancellationToken);
             smtpClient.Disconnect(true);

@@ -3,6 +3,7 @@ namespace GameSync.Api;
 using System.Reflection;
 using FluentValidation;
 using GameSync.Api.Shared.Middleware;
+using GameSync.Application.EmailInfrastructure;
 using GameSync.Application.Examples.Interfaces;
 using GameSync.Infrastructure.Examples;
 using Microsoft.OpenApi.Models;
@@ -47,6 +48,10 @@ public class Program
         builder.Services.AddAutoMapper(applicationAssembly);
 
         builder.Services.AddScoped<IExampleRepository, ExampleRepository>();
+
+        // Load environment variables
+        var emailPassword = Environment.GetEnvironmentVariable("BCP_GAMESYNC_EMAIL_PASSWORD");
+        builder.Services.AddSingleton<IEmailService>(new EmailService(configuration, new SendEmailCommandValidator(), emailPassword ?? string.Empty));
 
         var app = builder.Build();
 
