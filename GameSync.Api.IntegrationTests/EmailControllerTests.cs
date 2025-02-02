@@ -5,59 +5,58 @@ using GameSync.Api;
 using GameSync.Application.EmailInfrastructure.UseCases;
 using System.Net.Http.Json;
 
-namespace MyProject.Api.IntegrationTests
+namespace MyProject.Api.IntegrationTests;
+
+public class EmailControllerTests : IClassFixture<WebApplicationFactory<Program>>
 {
-    public class EmailControllerTests : IClassFixture<WebApplicationFactory<Program>>
+    private readonly WebApplicationFactory<Program> _factory;
+
+    public EmailControllerTests(WebApplicationFactory<Program> factory)
     {
-        private readonly WebApplicationFactory<Program> _factory;
+        _factory = factory;
+    }
 
-        public EmailControllerTests(WebApplicationFactory<Program> factory)
+    [Fact]
+    public async Task SendEmail_ReturnsOk_WhenEmailSentSuccessfully()
+    {
+        // Arrange
+        var command = new SendEmailCommand
         {
-            _factory = factory;
-        }
+            Sender = "bcp@bittencodeprojects.ugu.pl",
+            Receiver = "bcp@bittencodeprojects.ugu.pl",
+            Subject = "Test Email",
+            Body = "This is a test email.",
+            ReceiverEmail = "bcp@bittencodeprojects.ugu.pl"
+        };
 
-        [Fact]
-        public async Task SendEmail_ReturnsOk_WhenEmailSentSuccessfully()
+        var client = _factory.CreateClient();
+
+        // Act
+        var response = await client.PostAsJsonAsync("/api/email/send", command);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task SendEmail_ReturnsBadRequest_WhenEmailSendingFails()
+    {
+        // Arrange
+        var command = new SendEmailCommand
         {
-            // Arrange
-            var command = new SendEmailCommand
-            {
-                Sender = "bcp@bittencodeprojects.ugu.pl",
-                Receiver = "bcp@bittencodeprojects.ugu.pl",
-                Subject = "Test Email",
-                Body = "This is a test email.",
-                ReceiverEmail = "bcp@bittencodeprojects.ugu.pl"
-            };
+            Sender = "bcp2@bittencodeprojects.ugu.pl",
+            Receiver = "bcp2@bittencodeprojects.ugu.pl",
+            Subject = "Test Email",
+            Body = "This is a test email.",
+            ReceiverEmail = "bcp2@bittencodeprojects.ugu.pl"
+        };
 
-            var client = _factory.CreateClient();
+        var client = _factory.CreateClient();
 
-            // Act
-            var response = await client.PostAsJsonAsync("/api/email/send", command);
+        // Act
+        var response = await client.PostAsJsonAsync("/api/email/send", command);
 
-            // Assert
-            response.StatusCode.Should().Be(HttpStatusCode.OK);
-        }
-
-        [Fact]
-        public async Task SendEmail_ReturnsBadRequest_WhenEmailSendingFails()
-        {
-            // Arrange
-            var command = new SendEmailCommand
-            {
-                Sender = "bcp2@bittencodeprojects.ugu.pl",
-                Receiver = "bcp2@bittencodeprojects.ugu.pl",
-                Subject = "Test Email",
-                Body = "This is a test email.",
-                ReceiverEmail = "bcp2@bittencodeprojects.ugu.pl"
-            };
-
-            var client = _factory.CreateClient();
-
-            // Act
-            var response = await client.PostAsJsonAsync("/api/email/send", command);
-
-            // Assert
-            response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        }
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 }

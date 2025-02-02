@@ -1,4 +1,4 @@
-﻿namespace GameSync.Application.Examples.UseCases.CreateExample;
+﻿namespace GameSync.Application.EmailInfrastructure;
 
 using FluentValidation;
 using GameSync.Application.EmailInfrastructure.UseCases;

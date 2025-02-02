@@ -1,4 +1,4 @@
-namespace GameSync.Application.EmailInfrastructure.UseCases;
+namespace GameSync.Application.EmailInfrastructure;
 
 using GameSync.Domain.Shared.Commands;
 using MediatR;

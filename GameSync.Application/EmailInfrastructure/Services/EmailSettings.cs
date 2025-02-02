@@ -1,4 +1,4 @@
-namespace GameSync.Application.EmailInfrastructure.UseCases.SendEmail;
+namespace GameSync.Application.EmailInfrastructure;
 
 /// <summary>
 /// Represents the configuration settings for an email service.
@@ -14,7 +14,7 @@ public class EmailSettings
     /// Gets or sets the port number used by the SMTP server.
     /// Common values are 25, 465, or 587.
     /// </summary>
-    public int SmtpPort { get; set; }
+    public required int SmtpPort { get; set; }
 
     /// <summary>
     /// Gets or sets the email address used as the sender in outgoing emails.
