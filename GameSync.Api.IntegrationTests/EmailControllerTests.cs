@@ -4,6 +4,7 @@ using System.Net;
 using GameSync.Api;
 using GameSync.Application.EmailInfrastructure.UseCases;
 using System.Net.Http.Json;
+using GameSync.Application.EmailInfrastructure;
 
 namespace MyProject.Api.IntegrationTests;
 
