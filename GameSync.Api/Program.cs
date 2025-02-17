@@ -6,6 +6,7 @@ using GameSync.Api.Middleware;
 using GameSync.Api.Shared.Middleware;
 using GameSync.Infrastructure.Context;
 using GameSync.Infrastructure.Context.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
@@ -91,6 +92,12 @@ public class Program
         builder.Services.AddAutoMapper(applicationAssembly);
 
         builder.Services.AddIdentityApiEndpoints<ApplicationUser>().AddEntityFrameworkStores<AppDbContext>();
+
+        builder.Services.Configure<IdentityOptions>(options =>
+        {
+            options.Password.RequiredLength = 10;
+        });
+
         builder.Services.AddAuthorization();
 
         var app = builder.Build();
