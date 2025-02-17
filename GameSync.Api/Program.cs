@@ -96,6 +96,8 @@ public class Program
         builder.Services.Configure<IdentityOptions>(options =>
         {
             options.Password.RequiredLength = 10;
+            options.SignIn.RequireConfirmedEmail = true;
+            options.User.RequireUniqueEmail = true;
         });
 
         builder.Services.AddAuthorization();
