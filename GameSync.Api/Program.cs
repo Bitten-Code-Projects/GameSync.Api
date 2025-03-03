@@ -50,10 +50,10 @@ public class Program
         builder.Services.AddScoped<IExampleRepository, ExampleRepository>();
 
         // Load environment variables
-        var emailPassword = Environment.GetEnvironmentVariable("BCP_GAMESYNC_EMAIL_PASSWORD");
-        var authLogin = Environment.GetEnvironmentVariable("BCP_GAMESYNC_EMAIL_AUTH_LOGIN");
-        var senderEmail = Environment.GetEnvironmentVariable("BCP_GAMESYNC_EMAIL_SENDER_MAILBCP_GAMESYNC_EMAIL_SENDER_MAIL");
-        builder.Services.AddSingleton<IEmailService>(new EmailService(configuration, new SendEmailCommandValidator(), emailPassword ?? string.Empty, authLogin ?? string.Empty, senderEmail ?? string.Empty));
+        configuration["EmailSettings:Password"] = Environment.GetEnvironmentVariable("BCP_GAMESYNC_EMAIL_PASSWORD");
+        configuration["EmailSettings:AuthLogin"] = Environment.GetEnvironmentVariable("BCP_GAMESYNC_EMAIL_AUTH_LOGIN");
+        configuration["EmailSettings:SenderEmail"] = Environment.GetEnvironmentVariable("BCP_GAMESYNC_EMAIL_SENDER_MAILBCP_GAMESYNC_EMAIL_SENDER_MAIL");
+        builder.Services.AddSingleton<IEmailService>(new EmailService(configuration, new SendEmailCommandValidator()));
 
         var app = builder.Build();
 

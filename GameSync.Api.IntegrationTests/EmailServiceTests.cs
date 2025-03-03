@@ -7,7 +7,6 @@ using NSubstitute;
 
 namespace MyProject.Api.IntegrationTests;
 
-
 public interface IEmailService
 {
     Task SendEmailAsync(SendEmailCommand command);
