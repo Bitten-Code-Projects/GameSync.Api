@@ -7,11 +7,6 @@ using NSubstitute;
 
 namespace MyProject.Api.IntegrationTests;
 
-public interface IEmailService
-{
-    Task SendEmailAsync(SendEmailCommand command);
-}
-
 public class EmailServiceTests : IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly WebApplicationFactory<Program> _factory;
@@ -48,14 +43,14 @@ public class EmailServiceTests : IClassFixture<WebApplicationFactory<Program>>
             ReceiverEmail = "bcp@bittencodeprojects.ugu.pl"
         };
 
-        _emailService.SendEmailAsync(Arg.Any<SendEmailCommand>())
+        _emailService.SendEmailAsync(Arg.Any<SendEmailCommand>(), Arg.Any<CancellationToken>())
                      .Returns(Task.CompletedTask);
 
         // Act
-        await _emailService.SendEmailAsync(command);
+        await _emailService.SendEmailAsync(command, CancellationToken.None);
 
         // Assert
-        await _emailService.Received(1).SendEmailAsync(Arg.Any<SendEmailCommand>());
+        await _emailService.Received(1).SendEmailAsync(Arg.Any<SendEmailCommand>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -71,13 +66,13 @@ public class EmailServiceTests : IClassFixture<WebApplicationFactory<Program>>
             ReceiverEmail = "bcp2@bittencodeprojects.ugu.pl"
         };
 
-        _emailService.SendEmailAsync(Arg.Any<SendEmailCommand>())
+        _emailService.SendEmailAsync(Arg.Any<SendEmailCommand>(), Arg.Any<CancellationToken>())
                      .Returns(Task.FromException(new Exception("Email sending failed")));
 
         // Act & Assert
-        Func<Task> act = async () => { await _emailService.SendEmailAsync(command); };
+        Func<Task> act = async () => { await _emailService.SendEmailAsync(command, CancellationToken.None); };
         await act.Should().ThrowAsync<Exception>().WithMessage("Email sending failed");
 
-        await _emailService.Received(1).SendEmailAsync(Arg.Any<SendEmailCommand>());
+        await _emailService.Received(1).SendEmailAsync(Arg.Any<SendEmailCommand>(), Arg.Any<CancellationToken>());
     }
 }

@@ -1,13 +1,9 @@
 namespace GameSync.Application.EmailInfrastructure;
 
-using GameSync.Domain.Shared.Commands;
-using MediatR;
-
 /// <summary>
-/// Represents a command to send an email.
-/// This class implements IRequest with CommandResult for use with MediatR.
+/// Represents the payload containing the necessary details to send an email.
 /// </summary>
-public class SendEmailCommand : IRequest<CommandResult>
+public class SendEmailPayload
 {
     /// <summary>
     /// Gets or sets the email alias of the sender.

@@ -22,9 +22,9 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
 
         var configuration = new ConfigurationBuilder()
-        .SetBasePath(Directory.GetCurrentDirectory())
-        .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-        .Build();
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+            .Build();
 
         // Add services to the container.
         builder.Services.AddControllers();
@@ -50,10 +50,10 @@ public class Program
         builder.Services.AddScoped<IExampleRepository, ExampleRepository>();
 
         // Load environment variables
-        configuration["EmailSettings:Password"] = Environment.GetEnvironmentVariable("BCP_GAMESYNC_EMAIL_PASSWORD");
-        configuration["EmailSettings:AuthLogin"] = Environment.GetEnvironmentVariable("BCP_GAMESYNC_EMAIL_AUTH_LOGIN");
-        configuration["EmailSettings:SenderEmail"] = Environment.GetEnvironmentVariable("BCP_GAMESYNC_EMAIL_SENDER_MAILBCP_GAMESYNC_EMAIL_SENDER_MAIL");
-        builder.Services.AddSingleton<IEmailService>(new EmailService(configuration, new SendEmailCommandValidator()));
+        configuration["EmailSettings:Password"] = Environment.GetEnvironmentVariable("BCP_GS_EMAIL_PASS");
+        configuration["EmailSettings:AuthLogin"] = Environment.GetEnvironmentVariable("BCP_GS_EMAIL_USER");
+        configuration["EmailSettings:SenderEmail"] = Environment.GetEnvironmentVariable("BCP_GS_SENDER");
+        builder.Services.AddSingleton<IEmailService>(new EmailService(configuration));
 
         var app = builder.Build();
 
