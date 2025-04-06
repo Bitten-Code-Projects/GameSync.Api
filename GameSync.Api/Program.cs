@@ -5,8 +5,6 @@ using FluentValidation;
 using GameSync.Api.Middleware;
 using GameSync.Api.Shared.Middleware;
 using GameSync.Application.EmailInfrastructure;
-using GameSync.Application.Examples.Interfaces;
-using GameSync.Infrastructure.Examples;
 using GameSync.Infrastructure.Context;
 using GameSync.Infrastructure.Context.Models;
 using Microsoft.OpenApi.Models;
