@@ -2,11 +2,17 @@ namespace GameSync.Api;
 
 using System.Reflection;
 using FluentValidation;
+using GameSync.Api.Middleware;
 using GameSync.Api.Shared.Middleware;
 using GameSync.Application.EmailInfrastructure;
 using GameSync.Application.Examples.Interfaces;
 using GameSync.Infrastructure.Examples;
+using GameSync.Infrastructure.Context;
+using GameSync.Infrastructure.Context.Models;
 using Microsoft.OpenApi.Models;
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Resources;
 
 /// <summary>
 /// Main Program class.
@@ -25,6 +31,27 @@ public class Program
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
             .Build();
+      
+        builder.Logging.ClearProviders();
+        builder.Logging.AddOpenTelemetry(x => x.AddOtlpExporter(y =>
+        {
+            x.SetResourceBuilder(ResourceBuilder.CreateEmpty()
+                .AddService("GameSync.Api")
+                .AddTelemetrySdk()
+                .AddEnvironmentVariableDetector()
+                .AddAttributes(new Dictionary<string, object>
+                {
+                    ["host.type"] = Environment.MachineName,
+                    ["deployment.environment"] = builder.Environment.EnvironmentName,
+                }));
+
+            x.IncludeScopes = true;
+            x.IncludeFormattedMessage = true;
+
+            y.Endpoint = new Uri(Environment.GetEnvironmentVariable("SEQ_API_URL") !);
+            y.Protocol = OtlpExportProtocol.HttpProtobuf;
+            y.Headers = $"X-Seq-ApiKey={Environment.GetEnvironmentVariable("SEQ_API_KEY")}";
+        }));
 
         // Add services to the container.
         builder.Services.AddControllers();
@@ -33,21 +60,46 @@ public class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
-        builder.Services.AddSwaggerGen(c =>
+        builder.Services.AddSwaggerGen(opt =>
         {
-            c.SwaggerDoc("v1", new OpenApiInfo { Title = "GameSync", Version = "v1" });
+            opt.SwaggerDoc("v1", new OpenApiInfo { Title = "GameSync", Version = "v1" });
+            opt.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                In = ParameterLocation.Header,
+                Description = "Please enter token",
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
+                BearerFormat = "JWT",
+                Scheme = "bearer",
+            });
 
             var filePath = Path.Combine(AppContext.BaseDirectory, "GameSync.Api.xml");
-            c.IncludeXmlComments(filePath);
+            opt.IncludeXmlComments(filePath);
+
+            opt.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer",
+                        },
+                    },
+                    new string[] { }
+                },
+            });
         });
 
         var applicationAssembly = Assembly.Load("GameSync.Application");
         builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(applicationAssembly));
         builder.Services.AddValidatorsFromAssembly(applicationAssembly);
-        builder.Services.AddDbContext<ExampleDbContext>();
+        builder.Services.AddDbContext<AppDbContext>();
         builder.Services.AddAutoMapper(applicationAssembly);
 
-        builder.Services.AddScoped<IExampleRepository, ExampleRepository>();
+        builder.Services.AddIdentityApiEndpoints<ApplicationUser>().AddEntityFrameworkStores<AppDbContext>();
+        builder.Services.AddAuthorization();
 
         // Load environment variables
         configuration["EmailSettings:Password"] = Environment.GetEnvironmentVariable("BCP_GS_EMAIL_PASS");
@@ -58,6 +110,8 @@ public class Program
 
         var app = builder.Build();
 
+        app.MapGroup("/account").MapIdentityApi<ApplicationUser>();
+
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
@@ -67,9 +121,13 @@ public class Program
 
         app.UseHttpsRedirection();
 
-        app.UseAuthorization();
+        var logger = app.Services.GetRequiredService<ILogger<Program>>();
+        app.ConfigureExceptionHandler(logger);
 
-        app.ConfigureExceptionHandler();
+        app.UseRequestBodyLogging();
+        app.UseResponseBodyMiddleware();
+
+        app.UseAuthorization();
 
         app.MapControllers();
 
