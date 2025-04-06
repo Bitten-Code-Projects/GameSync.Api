@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using GameSync.Api;
 using GameSync.Application.EmailInfrastructure;
@@ -60,10 +59,15 @@ public class EmailServiceTests : IClassFixture<WebApplicationFactory<Program>>
         _emailService.SendEmailAsync(Arg.Any<SendEmailPayload>(), Arg.Any<CancellationToken>())
                .Returns(Task.FromException(new Exception("Email sending failed")));
 
-        // Act & Assert
-        Func<Task> act = async () => { await _emailService.SendEmailAsync(_command, CancellationToken.None); };
-        await act.Should().ThrowAsync<Exception>().WithMessage("Email sending failed");
+        // Act
+        var exception = await Assert.ThrowsAsync<Exception>(async () =>
+        {
+            await _emailService.SendEmailAsync(_command, CancellationToken.None);
+        });
 
+        // Assert
+        Assert.Equal("Email sending failed", exception.Message);
         await _emailService.Received(1).SendEmailAsync(Arg.Any<SendEmailPayload>(), Arg.Any<CancellationToken>());
     }
+
 }
