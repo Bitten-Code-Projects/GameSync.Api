@@ -44,20 +44,22 @@ public class EmailServiceTests : IClassFixture<WebApplicationFactory<Program>>
     public async Task SendEmail_ShouldCallEmailService_WhenEmailIsSentSuccessfully()
     {
         _emailService.SendEmailAsync(Arg.Any<SendEmailPayload>(), Arg.Any<CancellationToken>())
-                     .Returns(Task.CompletedTask);
+                     .Returns(Task.FromResult(true));
 
         // Act
-        await _emailService.SendEmailAsync(_command, CancellationToken.None);
+        var result = await _emailService.SendEmailAsync(_command, CancellationToken.None);
 
         // Assert
+        Assert.True(result);
         await _emailService.Received(1).SendEmailAsync(Arg.Any<SendEmailPayload>(), Arg.Any<CancellationToken>());
     }
+
 
     [Fact]
     public async Task SendEmail_ShouldThrowException_WhenEmailSendingFails()
     {
         _emailService.SendEmailAsync(Arg.Any<SendEmailPayload>(), Arg.Any<CancellationToken>())
-               .Returns(Task.FromException(new Exception("Email sending failed")));
+               .Returns(Task.FromException<bool>(new Exception("Email sending failed")));
 
         // Act
         var exception = await Assert.ThrowsAsync<Exception>(async () =>
