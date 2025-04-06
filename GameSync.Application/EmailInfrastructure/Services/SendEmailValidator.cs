@@ -14,7 +14,7 @@ public static class SendEmailValidator
     /// </returns>
     public static bool Validate(this SendEmailPayload payload)
     {
-        if (payload.Sender.IsEmpty() || payload.Receiver.IsEmpty() || payload.Subject.IsEmpty() || payload.Body.IsEmpty() || payload.ReceiverEmail.IsEmpty())
+        if (payload.Sender.IsNullOrEmpty() || payload.Receiver.IsNullOrEmpty() || payload.Subject.IsNullOrEmpty() || payload.Body.IsNullOrEmpty() || payload.ReceiverEmail.IsNullOrEmpty())
         {
             return false;
         }
@@ -29,7 +29,7 @@ public static class SendEmailValidator
     /// <returns>
     /// Returns <c>true</c> if the string is null or empty; otherwise, <c>false</c>.
     /// </returns>
-    private static bool IsEmpty(this string value) {
+    private static bool IsNullOrEmpty(this string value) {
         return string.IsNullOrEmpty(value);
     }
 }

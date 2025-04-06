@@ -30,4 +30,10 @@ public class EmailSettings
     /// Gets or sets the password to authenticate when sending email.
     /// </summary>
     public required string Password { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether TLS should be enforced.
+    /// </summary>
+    public required bool ForceTls { get; set; }
+
 }

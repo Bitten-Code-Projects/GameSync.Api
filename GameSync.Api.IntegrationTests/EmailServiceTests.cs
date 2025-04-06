@@ -12,6 +12,17 @@ public class EmailServiceTests : IClassFixture<WebApplicationFactory<Program>>
     private readonly WebApplicationFactory<Program> _factory;
     private readonly IEmailService _emailService;
 
+    private readonly SendEmailPayload _command = new SendEmailPayload
+    {
+        Sender = "bcp@bittencodeprojects.ugu.pl",
+        Receiver = "bcp@bittencodeprojects.ugu.pl",
+        Subject = "Test Email",
+        Body = "This is a test email.",
+        ReceiverEmail = "bcp@bittencodeprojects.ugu.pl"
+    };
+
+
+
     public EmailServiceTests(WebApplicationFactory<Program> factory)
     {
         _emailService = NSubstitute.Substitute.For<IEmailService>();
@@ -31,48 +42,28 @@ public class EmailServiceTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
-    public async Task SendEmail_ReturnsOk_WhenEmailSentSuccessfully()
+    public async Task SendEmail_ShouldCallEmailService_WhenEmailIsSentSuccessfully()
     {
-        // Arrange
-        var command = new SendEmailCommand
-        {
-            Sender = "bcp@bittencodeprojects.ugu.pl",
-            Receiver = "bcp@bittencodeprojects.ugu.pl",
-            Subject = "Test Email",
-            Body = "This is a test email.",
-            ReceiverEmail = "bcp@bittencodeprojects.ugu.pl"
-        };
-
-        _emailService.SendEmailAsync(Arg.Any<SendEmailCommand>(), Arg.Any<CancellationToken>())
+        _emailService.SendEmailAsync(Arg.Any<SendEmailPayload>(), Arg.Any<CancellationToken>())
                      .Returns(Task.CompletedTask);
 
         // Act
-        await _emailService.SendEmailAsync(command, CancellationToken.None);
+        await _emailService.SendEmailAsync(_command, CancellationToken.None);
 
         // Assert
-        await _emailService.Received(1).SendEmailAsync(Arg.Any<SendEmailCommand>(), Arg.Any<CancellationToken>());
+        await _emailService.Received(1).SendEmailAsync(Arg.Any<SendEmailPayload>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task SendEmail_ReturnsBadRequest_WhenEmailSendingFails()
+    public async Task SendEmail_ShouldThrowException_WhenEmailSendingFails()
     {
-        // Arrange
-        var command = new SendEmailCommand
-        {
-            Sender = "bcp2@bittencodeprojects.ugu.pl",
-            Receiver = "bcp2@bittencodeprojects.ugu.pl",
-            Subject = "Test Email",
-            Body = "This is a test email.",
-            ReceiverEmail = "bcp2@bittencodeprojects.ugu.pl"
-        };
-
-        _emailService.SendEmailAsync(Arg.Any<SendEmailCommand>(), Arg.Any<CancellationToken>())
-                     .Returns(Task.FromException(new Exception("Email sending failed")));
+        _emailService.SendEmailAsync(Arg.Any<SendEmailPayload>(), Arg.Any<CancellationToken>())
+               .Returns(Task.FromException(new Exception("Email sending failed")));
 
         // Act & Assert
-        Func<Task> act = async () => { await _emailService.SendEmailAsync(command, CancellationToken.None); };
+        Func<Task> act = async () => { await _emailService.SendEmailAsync(_command, CancellationToken.None); };
         await act.Should().ThrowAsync<Exception>().WithMessage("Email sending failed");
 
-        await _emailService.Received(1).SendEmailAsync(Arg.Any<SendEmailCommand>(), Arg.Any<CancellationToken>());
+        await _emailService.Received(1).SendEmailAsync(Arg.Any<SendEmailPayload>(), Arg.Any<CancellationToken>());
     }
 }

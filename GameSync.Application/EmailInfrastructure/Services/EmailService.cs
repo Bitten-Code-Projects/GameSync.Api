@@ -36,37 +36,75 @@ public class EmailService : IEmailService
     /// a success result is returned; if any error occurs during the process, a failure result is returned.
     /// </remarks>
     public async Task<bool> SendEmailAsync(SendEmailPayload payload, CancellationToken cancellationToken)
+{
+    Ensure.That(payload).IsNotNull();
+
+    bool validationResult = payload.Validate();
+
+    if (!validationResult)
     {
-        Ensure.That(payload).IsNotNull();
-
-        bool validationResult = payload.Validate();
-
-        if (!validationResult)
-        {
-            return false;
-        }
-
-        var emailSettings = _configuration.GetRequiredSection("EmailSettings").Get<EmailSettings>()
-        ?? throw new InvalidOperationException("EmailSettings configuration is invalid");
-
-        var email = new MimeMessage();
-        email.From.Add(new MailboxAddress(payload.Sender, emailSettings.SenderEmail));
-        email.To.Add(new MailboxAddress(payload.Receiver, payload.ReceiverEmail));
-        email.Subject = payload.Subject;
-        email.Body = new TextPart("plain")
-        {
-            Text = payload.Body,
-        };
-
-        using (var smtpClient = new SmtpClient())
-        {
-            smtpClient.CheckCertificateRevocation = false;
-            await smtpClient.ConnectAsync(emailSettings.SmtpServer, emailSettings.SmtpPort, MailKit.Security.SecureSocketOptions.StartTlsWhenAvailable, cancellationToken);
-            await smtpClient.AuthenticateAsync(emailSettings.AuthLogin, emailSettings.Password, cancellationToken);
-            await smtpClient.SendAsync(email, cancellationToken);
-            await smtpClient.DisconnectAsync(true, cancellationToken);
-        }
-
-        return true;
+        return false;
     }
+
+    var emailSettings = _configuration.GetRequiredSection("EmailSettings").Get<EmailSettings>()
+    ?? throw new InvalidOperationException("EmailSettings configuration is invalid");
+
+    var email = new MimeMessage();
+    email.From.Add(new MailboxAddress(payload.Sender, emailSettings.SenderEmail));
+    email.To.Add(new MailboxAddress(payload.Receiver, payload.ReceiverEmail));
+    email.Subject = payload.Subject;
+    email.Body = new TextPart("plain")
+    {
+        Text = payload.Body,
+    };
+
+    var secureSocketOptions = emailSettings.ForceTls
+        ? MailKit.Security.SecureSocketOptions.SslOnConnect
+        : MailKit.Security.SecureSocketOptions.StartTlsWhenAvailable;
+
+    using (var smtpClient = new SmtpClient())
+    {
+        smtpClient.CheckCertificateRevocation = false;
+        await smtpClient.ConnectAsync(emailSettings.SmtpServer, emailSettings.SmtpPort, secureSocketOptions, cancellationToken);
+        await smtpClient.AuthenticateAsync(emailSettings.AuthLogin, emailSettings.Password, cancellationToken);
+        await smtpClient.SendAsync(email, cancellationToken);
+        await smtpClient.DisconnectAsync(true, cancellationToken);
+    }
+
+    return true;
+}
+    // public async Task<bool> SendEmailAsync(SendEmailPayload payload, CancellationToken cancellationToken)
+    // {
+    //     Ensure.That(payload).IsNotNull();
+
+    //     bool validationResult = payload.Validate();
+
+    //     if (!validationResult)
+    //     {
+    //         return false;
+    //     }
+
+    //     var emailSettings = _configuration.GetRequiredSection("EmailSettings").Get<EmailSettings>()
+    //     ?? throw new InvalidOperationException("EmailSettings configuration is invalid");
+
+    //     var email = new MimeMessage();
+    //     email.From.Add(new MailboxAddress(payload.Sender, emailSettings.SenderEmail));
+    //     email.To.Add(new MailboxAddress(payload.Receiver, payload.ReceiverEmail));
+    //     email.Subject = payload.Subject;
+    //     email.Body = new TextPart("plain")
+    //     {
+    //         Text = payload.Body,
+    //     };
+
+    //     using (var smtpClient = new SmtpClient())
+    //     {
+    //         smtpClient.CheckCertificateRevocation = false;
+    //         await smtpClient.ConnectAsync(emailSettings.SmtpServer, emailSettings.SmtpPort, MailKit.Security.SecureSocketOptions.StartTlsWhenAvailable, cancellationToken);
+    //         await smtpClient.AuthenticateAsync(emailSettings.AuthLogin, emailSettings.Password, cancellationToken);
+    //         await smtpClient.SendAsync(email, cancellationToken);
+    //         await smtpClient.DisconnectAsync(true, cancellationToken);
+    //     }
+
+    //     return true;
+    // }
 }
