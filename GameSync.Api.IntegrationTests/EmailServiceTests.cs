@@ -1,72 +1,65 @@
+namespace MyProject.Api.IntegrationTests;
+
 using Microsoft.AspNetCore.Mvc.Testing;
 using GameSync.Api;
 using GameSync.Application.EmailInfrastructure;
-using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
-
-namespace MyProject.Api.IntegrationTests;
+using Moq;
+using Microsoft.Extensions.Configuration;
+using MailKit.Security;
+using MimeKit;
 
 public class EmailServiceTests : IClassFixture<WebApplicationFactory<Program>>
 {
-    private readonly WebApplicationFactory<Program> _factory;
-    private readonly IEmailService _emailService;
-
-    private readonly SendEmailPayload _command = new SendEmailPayload
-    {
-        Sender = "bcp@bittencodeprojects.ugu.pl",
-        Receiver = "bcp@bittencodeprojects.ugu.pl",
-        Subject = "Test Email",
-        Body = "This is a test email.",
-        ReceiverEmail = "bcp@bittencodeprojects.ugu.pl"
-    };
-
-    public EmailServiceTests(WebApplicationFactory<Program> factory)
-    {
-        _emailService = NSubstitute.Substitute.For<IEmailService>();
-
-        _factory = factory.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureServices(services =>
-            {
-                var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IEmailService));
-                if (descriptor != null)
-                {
-                    services.Remove(descriptor);
-                }
-                services.AddSingleton(_emailService);
-            });
-        });
-    }
-
     [Fact]
-    public async Task SendEmail_ShouldCallEmailService_WhenEmailIsSentSuccessfully()
+    public async Task SendEmailAsync_ValidPayload_SendsEmail()
     {
-        _emailService.SendEmailAsync(Arg.Any<SendEmailPayload>(), Arg.Any<CancellationToken>())
-                     .Returns(Task.FromResult(true));
+        // Arrange
+        var mockSmtpClient = new Mock<ISmtpClient>();
+        var mockMessageFactory = new Mock<IEmailMessageFactory>();
+        var mockConfiguration = new Mock<IConfiguration>();
+        var emailSettings = new EmailSettings
+        {
+            SmtpServer = "smtp.test.com",
+            SmtpPort = 587,
+            AuthLogin = "test",
+            Password = "test",
+            SenderEmail = "sender@test.com",
+            ForceTls = true
+        };
+
+        var mockSection = new Mock<IConfigurationSection>();
+        mockConfiguration.Setup(x => x.GetSection("EmailSettings")).Returns(mockSection.Object);
+        mockSection.Setup(x => x.GetChildren()).Returns(new List<IConfigurationSection>
+        {
+            new Mock<IConfigurationSection>().Object
+        });
+
+        var payload = new SendEmailPayload
+        {
+            Sender = "Test Sender",
+            Receiver = "Test Receiver",
+            ReceiverEmail = "receiver@test.com",
+            Subject = "Test Subject",
+            Body = "Test Body"
+        };
+
+        var emailService = new EmailService(
+            mockConfiguration.Object,
+            mockSmtpClient.Object,
+            mockMessageFactory.Object);
 
         // Act
-        var result = await _emailService.SendEmailAsync(_command, CancellationToken.None);
+        var result = await emailService.SendEmailAsync(payload, CancellationToken.None);
 
         // Assert
         Assert.True(result);
-        await _emailService.Received(1).SendEmailAsync(Arg.Any<SendEmailPayload>(), Arg.Any<CancellationToken>());
+        mockSmtpClient.Verify(x => x.ConnectAsync(
+            It.IsAny<string>(),
+            It.IsAny<int>(),
+            It.IsAny<SecureSocketOptions>(),
+            It.IsAny<CancellationToken>()), Times.Once);
+        mockSmtpClient.Verify(x => x.SendAsync(
+            It.IsAny<MimeMessage>(),
+            It.IsAny<CancellationToken>()), Times.Once);
     }
-
-    [Fact]
-    public async Task SendEmail_ShouldThrowException_WhenEmailSendingFails()
-    {
-        _emailService.SendEmailAsync(Arg.Any<SendEmailPayload>(), Arg.Any<CancellationToken>())
-               .Returns(Task.FromException<bool>(new Exception("Email sending failed")));
-
-        // Act
-        var exception = await Assert.ThrowsAsync<Exception>(async () =>
-        {
-            await _emailService.SendEmailAsync(_command, CancellationToken.None);
-        });
-
-        // Assert
-        Assert.Equal("Email sending failed", exception.Message);
-        await _emailService.Received(1).SendEmailAsync(Arg.Any<SendEmailPayload>(), Arg.Any<CancellationToken>());
-    }
-
 }

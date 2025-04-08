@@ -29,7 +29,7 @@ public class Program
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
             .Build();
-      
+
         builder.Logging.ClearProviders();
         builder.Logging.AddOpenTelemetry(x => x.AddOtlpExporter(y =>
         {
@@ -46,13 +46,16 @@ public class Program
             x.IncludeScopes = true;
             x.IncludeFormattedMessage = true;
 
-            y.Endpoint = new Uri(Environment.GetEnvironmentVariable("SEQ_API_URL") !);
+            y.Endpoint = new Uri(Environment.GetEnvironmentVariable("SEQ_API_URL")!);
             y.Protocol = OtlpExportProtocol.HttpProtobuf;
             y.Headers = $"X-Seq-ApiKey={Environment.GetEnvironmentVariable("SEQ_API_KEY")}";
         }));
 
         // Add services to the container.
         builder.Services.AddControllers();
+        builder.Services.AddScoped<ISmtpClient, SmtpClientWrapper>();
+        builder.Services.AddScoped<IEmailMessageFactory, EmailMessageFactory>();
+        builder.Services.AddScoped<IEmailService, EmailService>();
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();

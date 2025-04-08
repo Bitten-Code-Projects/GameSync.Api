@@ -1,76 +1,76 @@
 namespace GameSync.Application.EmailInfrastructure;
 
 using EnsureThat;
-using MailKit.Net.Smtp;
+using MailKit.Security;
 using Microsoft.Extensions.Configuration;
-using MimeKit;
 
 /// <summary>
-/// Provides functionality for sending emails.
+/// Provides functionality for sending emails using SMTP.
 /// </summary>
 public class EmailService : IEmailService
 {
     private readonly IConfiguration _configuration;
+    private readonly ISmtpClient _smtpClient;
+    private readonly IEmailMessageFactory _messageFactory;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="EmailService"/> class using the specified configuration.
+    /// Initializes a new instance of the <see cref="EmailService"/> class.
     /// </summary>
-    /// <param name="configuration">The application configuration settings.</param>
-    public EmailService(IConfiguration configuration)
+    /// <param name="configuration">The configuration settings.</param>
+    /// <param name="smtpClient">The SMTP client used for sending emails.</param>
+    /// <param name="messageFactory">The factory for creating email messages.</param>
+    public EmailService(
+        IConfiguration configuration,
+        ISmtpClient smtpClient,
+        IEmailMessageFactory messageFactory)
     {
         _configuration = configuration;
+        _smtpClient = smtpClient;
+        _messageFactory = messageFactory;
     }
 
     /// <summary>
-    /// Sends an email based on the provided payload.
+    /// Sends an email asynchronously using the provided payload and cancellation token.
     /// </summary>
-    /// <param name="payload">The payload containing the email details such as sender, receiver, subject, and body.</param>
-    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <returns>
-    /// A <see cref="bool"/> indicating the success or failure of the email sending operation.
-    /// </returns>
-    /// <remarks>
-    /// This method first validates the payload using custom validation logic. If the payload is invalid,
-    /// it returns a failure result with an error message. Otherwise, it retrieves the email settings from the configuration,
-    /// constructs a <see cref="MimeMessage"/>, and sends the email using an SMTP client. If the email is sent successfully,
-    /// a success result is returned; if any error occurs during the process, a failure result is returned.
-    /// </remarks>
+    /// <param name="payload">The payload containing email details such as sender, receiver, subject, and body.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a boolean indicating success or failure.</returns>
     public async Task<bool> SendEmailAsync(SendEmailPayload payload, CancellationToken cancellationToken)
     {
         Ensure.That(payload).IsNotNull();
 
-        bool validationResult = payload.Validate();
-
-        if (!validationResult)
+        if (!payload.Validate())
         {
             return false;
         }
 
         var emailSettings = _configuration.GetRequiredSection("EmailSettings").Get<EmailSettings>()
-        ?? throw new InvalidOperationException("EmailSettings configuration is invalid");
+            ?? throw new InvalidOperationException("EmailSettings configuration is invalid");
 
-        var email = new MimeMessage();
-        email.From.Add(new MailboxAddress(payload.Sender, emailSettings.SenderEmail));
-        email.To.Add(new MailboxAddress(payload.Receiver, payload.ReceiverEmail));
-        email.Subject = payload.Subject;
-        email.Body = new TextPart("plain")
-        {
-            Text = payload.Body,
-        };
+        var email = _messageFactory.CreateMessage(
+            payload.Sender,
+            emailSettings.SenderEmail,
+            payload.Receiver,
+            payload.ReceiverEmail,
+            payload.Subject,
+            payload.Body);
 
         var secureSocketOptions = emailSettings.ForceTls
-            ? MailKit.Security.SecureSocketOptions.SslOnConnect
-            : MailKit.Security.SecureSocketOptions.StartTlsWhenAvailable;
+            ? SecureSocketOptions.SslOnConnect
+            : SecureSocketOptions.StartTlsWhenAvailable;
 
-        using (var smtpClient = new SmtpClient())
+        try
         {
-            smtpClient.CheckCertificateRevocation = false;
-            await smtpClient.ConnectAsync(emailSettings.SmtpServer, emailSettings.SmtpPort, secureSocketOptions, cancellationToken);
-            await smtpClient.AuthenticateAsync(emailSettings.AuthLogin, emailSettings.Password, cancellationToken);
-            await smtpClient.SendAsync(email, cancellationToken);
-            await smtpClient.DisconnectAsync(true, cancellationToken);
+            _smtpClient.CheckCertificateRevocation = false;
+            await _smtpClient.ConnectAsync(emailSettings.SmtpServer, emailSettings.SmtpPort, secureSocketOptions, cancellationToken);
+            await _smtpClient.AuthenticateAsync(emailSettings.AuthLogin, emailSettings.Password, cancellationToken);
+            await _smtpClient.SendAsync(email, cancellationToken);
+            await _smtpClient.DisconnectAsync(true, cancellationToken);
+            return true;
         }
-
-        return true;
+        catch
+        {
+            return false;
+        }
     }
 }
