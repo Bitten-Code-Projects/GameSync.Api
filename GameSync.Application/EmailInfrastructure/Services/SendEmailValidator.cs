@@ -14,22 +14,11 @@ public static class SendEmailValidator
     /// </returns>
     public static bool Validate(this SendEmailPayload payload)
     {
-        if (payload.Sender.IsNullOrEmpty() || payload.Receiver.IsNullOrEmpty() || payload.Subject.IsNullOrEmpty() || payload.Body.IsNullOrEmpty() || payload.ReceiverEmail.IsNullOrEmpty())
+        if (string.IsNullOrWhiteSpace(payload.Sender) || string.IsNullOrWhiteSpace(payload.Receiver) || string.IsNullOrWhiteSpace(payload.Subject) || string.IsNullOrWhiteSpace(payload.Body) || string.IsNullOrWhiteSpace(payload.ReceiverEmail))
         {
             return false;
         }
 
         return true;
-    }
-
-    /// <summary>
-    /// Determines whether the specified string is null or an empty string.
-    /// </summary>
-    /// <param name="value">The string to check.</param>
-    /// <returns>
-    /// Returns <c>true</c> if the string is null or empty; otherwise, <c>false</c>.
-    /// </returns>
-    private static bool IsNullOrEmpty(this string value) {
-        return string.IsNullOrEmpty(value);
     }
 }

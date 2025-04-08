@@ -20,8 +20,6 @@ public class EmailServiceTests : IClassFixture<WebApplicationFactory<Program>>
         ReceiverEmail = "bcp@bittencodeprojects.ugu.pl"
     };
 
-
-
     public EmailServiceTests(WebApplicationFactory<Program> factory)
     {
         _emailService = NSubstitute.Substitute.For<IEmailService>();
@@ -53,7 +51,6 @@ public class EmailServiceTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.True(result);
         await _emailService.Received(1).SendEmailAsync(Arg.Any<SendEmailPayload>(), Arg.Any<CancellationToken>());
     }
-
 
     [Fact]
     public async Task SendEmail_ShouldThrowException_WhenEmailSendingFails()
