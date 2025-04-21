@@ -35,5 +35,4 @@ public class EmailSettings
     /// Gets or sets a value indicating whether TLS should be enforced.
     /// </summary>
     public required bool ForceTls { get; set; }
-
 }
