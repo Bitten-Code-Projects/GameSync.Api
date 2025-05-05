@@ -1,3 +1,5 @@
+using GameSync.Domain.Shared.Commands;
+
 namespace GameSync.Application.EmailInfrastructure;
 
 /// <summary>
@@ -13,5 +15,5 @@ public interface IEmailService
     /// <returns>
     /// A <see cref="bool"/> representing the result of the email sending operation.
     /// </returns>
-    Task<bool> SendEmailAsync(SendEmailPayload payload, CancellationToken cancellationToken);
+    Task<CommandResult> SendEmailAsync(SendEmailPayload payload, CancellationToken cancellationToken);
 }

@@ -12,13 +12,7 @@ public static class SendEmailValidator
     /// <returns>
     /// Returns <c>true</c> if the sender, receiver, subject, body, and receiver email are not empty; otherwise, <c>false</c>.
     /// </returns>
-    public static bool Validate(this SendEmailPayload payload)
-    {
-        if (string.IsNullOrWhiteSpace(payload.Sender) || string.IsNullOrWhiteSpace(payload.Receiver) || string.IsNullOrWhiteSpace(payload.Subject) || string.IsNullOrWhiteSpace(payload.Body) || string.IsNullOrWhiteSpace(payload.ReceiverEmail))
-        {
-            return false;
-        }
-
-        return true;
-    }
+ public static bool Validate(this SendEmailPayload payload) =>
+    new[] { payload.Sender, payload.Receiver, payload.Subject, payload.Body, payload.ReceiverEmail }
+    .All(field => !string.IsNullOrEmpty(field));
 }
