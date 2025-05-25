@@ -4,6 +4,8 @@ using System.Reflection;
 using FluentValidation;
 using GameSync.Api.Middleware;
 using GameSync.Api.Shared.Middleware;
+using GameSync.Api.Validators.Account;
+using GameSync.Application.Account.Dtos;
 using GameSync.Infrastructure.Context;
 using GameSync.Infrastructure.Context.Models;
 using Microsoft.AspNetCore.Identity;
@@ -95,7 +97,12 @@ public class Program
 
         builder.Services.Configure<IdentityOptions>(options =>
         {
+            options.Password.RequireDigit = true;
+            options.Password.RequireLowercase = true;
+            options.Password.RequireNonAlphanumeric = true;
+            options.Password.RequireUppercase = true;
             options.Password.RequiredLength = 10;
+
             options.SignIn.RequireConfirmedEmail = true;
             options.User.RequireUniqueEmail = true;
         });
@@ -103,8 +110,6 @@ public class Program
         builder.Services.AddAuthorization();
 
         var app = builder.Build();
-
-        app.MapGroup("/account").MapIdentityApi<ApplicationUser>();
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
