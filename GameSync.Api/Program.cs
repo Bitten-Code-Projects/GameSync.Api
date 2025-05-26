@@ -4,6 +4,7 @@ using System.Reflection;
 using FluentValidation;
 using GameSync.Api.Middleware;
 using GameSync.Api.Shared.Middleware;
+using GameSync.Application.EmailInfrastructure;
 using GameSync.Infrastructure.Context;
 using GameSync.Infrastructure.Context.Models;
 using Microsoft.OpenApi.Models;
@@ -24,6 +25,11 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            .Build();
+
         builder.Logging.ClearProviders();
         builder.Logging.AddOpenTelemetry(x => x.AddOtlpExporter(y =>
         {
@@ -40,13 +46,16 @@ public class Program
             x.IncludeScopes = true;
             x.IncludeFormattedMessage = true;
 
-            y.Endpoint = new Uri(Environment.GetEnvironmentVariable("SEQ_API_URL") !);
+            y.Endpoint = new Uri(Environment.GetEnvironmentVariable("SEQ_API_URL")!);
             y.Protocol = OtlpExportProtocol.HttpProtobuf;
             y.Headers = $"X-Seq-ApiKey={Environment.GetEnvironmentVariable("SEQ_API_KEY")}";
         }));
 
         // Add services to the container.
         builder.Services.AddControllers();
+        builder.Services.AddScoped<ISmtpClient, SmtpClientWrapper>();
+        builder.Services.AddScoped<IEmailMessageFactory, EmailMessageFactory>();
+        builder.Services.AddScoped<IEmailService, EmailService>();
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
@@ -92,6 +101,13 @@ public class Program
 
         builder.Services.AddIdentityApiEndpoints<ApplicationUser>().AddEntityFrameworkStores<AppDbContext>();
         builder.Services.AddAuthorization();
+
+        // Load environment variables
+        configuration["EmailSettings:Password"] = Environment.GetEnvironmentVariable("BCP_GS_EMAIL_PASS");
+        configuration["EmailSettings:AuthLogin"] = Environment.GetEnvironmentVariable("BCP_GS_EMAIL_USER");
+        configuration["EmailSettings:SenderEmail"] = Environment.GetEnvironmentVariable("BCP_GS_SENDER");
+        builder.Services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
+        builder.Services.AddSingleton<IEmailService, EmailService>();
 
         var app = builder.Build();
 
