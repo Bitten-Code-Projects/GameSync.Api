@@ -7,15 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\GlobalSuppressions.cs" Link="GlobalSuppressions.cs" />
+    <Compile Remove="Examples\**" />
+    <EmbeddedResource Remove="Examples\**" />
+    <None Remove="Examples\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Examples\Extensions\" />
-    <Folder Include="Examples\Interfaces\" />
-    <Folder Include="Examples\Mapping\" />
-    <Folder Include="Examples\Requests\" />
-    <Folder Include="Examples\UseCases\" />
+    <Compile Include="..\GlobalSuppressions.cs" Link="GlobalSuppressions.cs" />
   </ItemGroup>
 
   <ItemGroup>

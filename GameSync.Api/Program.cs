@@ -5,8 +5,11 @@ using FluentValidation;
 using GameSync.Api.Middleware;
 using GameSync.Api.Shared.Middleware;
 using GameSync.Application.EmailInfrastructure;
+using GameSync.Api.Validators.Account;
+using GameSync.Application.Account.Dtos;
 using GameSync.Infrastructure.Context;
 using GameSync.Infrastructure.Context.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
@@ -100,6 +103,19 @@ public class Program
         builder.Services.AddAutoMapper(applicationAssembly);
 
         builder.Services.AddIdentityApiEndpoints<ApplicationUser>().AddEntityFrameworkStores<AppDbContext>();
+
+        builder.Services.Configure<IdentityOptions>(options =>
+        {
+            options.Password.RequireDigit = true;
+            options.Password.RequireLowercase = true;
+            options.Password.RequireNonAlphanumeric = true;
+            options.Password.RequireUppercase = true;
+            options.Password.RequiredLength = 10;
+
+            options.SignIn.RequireConfirmedEmail = true;
+            options.User.RequireUniqueEmail = true;
+        });
+
         builder.Services.AddAuthorization();
 
         // Load environment variables
@@ -110,8 +126,6 @@ public class Program
         builder.Services.AddSingleton<IEmailService, EmailService>();
 
         var app = builder.Build();
-
-        app.MapGroup("/account").MapIdentityApi<ApplicationUser>();
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
