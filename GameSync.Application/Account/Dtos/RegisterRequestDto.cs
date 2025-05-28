@@ -20,4 +20,3 @@ public class RegisterRequestDto
     /// </summary>
     public required string Email { get; set; }
 }
-
