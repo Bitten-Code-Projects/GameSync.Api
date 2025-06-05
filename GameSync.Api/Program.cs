@@ -1,3 +1,6 @@
+using GameSync.Infrastructure.Emails;
+using Microsoft.AspNetCore.Identity;
+
 namespace GameSync.Api;
 
 using System.Reflection;
@@ -53,9 +56,9 @@ public class Program
 
         // Add services to the container.
         builder.Services.AddControllers();
-        builder.Services.AddScoped<ISmtpClient, SmtpClientWrapper>();
-        builder.Services.AddScoped<IEmailMessageFactory, EmailMessageFactory>();
-        builder.Services.AddScoped<IEmailService, EmailService>();
+        builder.Services.AddSingleton<ISmtpClient, SmtpClientWrapper>();
+        builder.Services.AddSingleton<IEmailMessageFactory, EmailMessageFactory>();
+        builder.Services.AddSingleton<IEmailService, EmailService>();
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
@@ -99,7 +102,9 @@ public class Program
         builder.Services.AddDbContext<AppDbContext>();
         builder.Services.AddAutoMapper(applicationAssembly);
 
-        builder.Services.AddIdentityApiEndpoints<ApplicationUser>().AddEntityFrameworkStores<AppDbContext>();
+        builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
+            .AddEntityFrameworkStores<AppDbContext>()
+            .AddDefaultTokenProviders();
         builder.Services.AddAuthorization();
 
         // Load environment variables
@@ -107,7 +112,7 @@ public class Program
         configuration["EmailSettings:AuthLogin"] = Environment.GetEnvironmentVariable("BCP_GS_EMAIL_USER");
         configuration["EmailSettings:SenderEmail"] = Environment.GetEnvironmentVariable("BCP_GS_SENDER");
         builder.Services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
-        builder.Services.AddSingleton<IEmailService, EmailService>();
+        builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityEmailSender>();
 
         var app = builder.Build();
 

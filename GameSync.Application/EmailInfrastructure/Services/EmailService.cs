@@ -14,7 +14,7 @@ public class EmailService : IEmailService
     private readonly IConfiguration _configuration;
     private readonly ISmtpClient _smtpClient;
     private readonly IEmailMessageFactory _messageFactory;
-    private readonly ILogger _logger;
+    private readonly ILogger<EmailService> _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EmailService"/> class.
@@ -26,7 +26,7 @@ public class EmailService : IEmailService
     public EmailService(
         IConfiguration configuration,
         ISmtpClient smtpClient,
-        ILogger logger,
+        ILogger<EmailService> logger,
         IEmailMessageFactory messageFactory)
     {
         _configuration = configuration;
