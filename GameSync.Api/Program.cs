@@ -123,7 +123,6 @@ public class Program
         configuration["EmailSettings:AuthLogin"] = Environment.GetEnvironmentVariable("BCP_GS_EMAIL_USER");
         configuration["EmailSettings:SenderEmail"] = Environment.GetEnvironmentVariable("BCP_GS_SENDER");
         builder.Services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
-        builder.Services.AddSingleton<IEmailService, EmailService>();
 
         var app = builder.Build();
 
