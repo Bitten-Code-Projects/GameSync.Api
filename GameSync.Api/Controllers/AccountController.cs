@@ -1,5 +1,10 @@
-﻿using GameSync.Application.Account.Dtos;
+﻿using System.Net;
+using GameSync.Application.Account.ConfirmEmails;
+using GameSync.Application.Account.Dtos;
+using GameSync.Application.Shared.Commands;
 using GameSync.Infrastructure.Context.Models;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,16 +27,19 @@ namespace GameSync.Api.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger _logger;
+        private readonly IMediator _mediator;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AccountController"/> class.
         /// </summary>
         /// <param name="userManager">The <see cref="UserManager{ApplicationUser}"/> instance used to manage users.</param>
         /// <param name="logger">The <see cref="ILogger"/> instance used to send log entries to Seq.</param>
-        public AccountController(UserManager<ApplicationUser> userManager, ILogger<AccountController> logger)
+        /// <param name="mediator"> The <see cref="IMediator"/> instance used to send command and queries using CQRS pattern.</param>
+        public AccountController(UserManager<ApplicationUser> userManager, ILogger<AccountController> logger, IMediator mediator)
         {
             _userManager = userManager;
             _logger = logger;
+            _mediator = mediator;
         }
 
         /// <summary>
@@ -92,6 +100,39 @@ namespace GameSync.Api.Controllers
             // ToDo: Send email to activate account. (waiting for sending email feature)
 
             return Ok(new { message = "User registered successfully." });
+        }
+
+        /// <summary>
+        /// Confirms user's email with provided confirmation code for specified user by user's id.
+        /// </summary>
+        /// <param name="userId">User's id.</param>
+        /// <param name="code">Confirmation code.</param>
+        /// <returns>
+        /// An <see cref="IActionResult"/> representing the HTTP response:
+        /// <list type="bullet">
+        /// <item><description>200 OK with a success message if confirmation succeeds.</description></item>
+        /// <item><description>400 Bad Request with validation error if the input is invalid or confirmation fails.</description></item>
+        /// </list>
+        /// </returns>
+        [Authorize]
+        [HttpGet("/confirm-email")]
+        [ProducesResponseType(typeof(OkResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ConfirmEmail([FromRoute] Guid userId, [FromRoute] string code)
+        {
+            var command = new ConfirmEmailCommand(
+                userId,
+                code,
+                HttpContext.User);
+
+            var result = await _mediator.Send(command);
+            if (result == CommandResult.Success)
+            {
+                return Ok();
+            }
+
+            _logger.LogWarning("Confirmation email failed - [{reason}]", result.FailureReason);
+            return BadRequest(result.FailureReason);
         }
     }
 }

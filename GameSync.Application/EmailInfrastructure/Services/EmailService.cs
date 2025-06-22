@@ -1,7 +1,8 @@
+using GameSync.Application.Shared.Commands;
+
 namespace GameSync.Application.EmailInfrastructure;
 
 using EnsureThat;
-using GameSync.Domain.Shared.Commands;
 using MailKit.Security;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;

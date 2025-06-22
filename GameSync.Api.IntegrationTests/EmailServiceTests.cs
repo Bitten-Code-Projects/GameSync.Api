@@ -1,3 +1,5 @@
+using GameSync.Application.Shared.Commands;
+
 namespace MyProject.Api.IntegrationTests;
 
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -10,7 +12,6 @@ using NSubstitute;
 using Shouldly;
 using Microsoft.Extensions.Logging;
 using NSubstitute.ExceptionExtensions;
-using GameSync.Domain.Shared.Commands;
 
 public class EmailServiceTests : IClassFixture<WebApplicationFactory<Program>>
 {

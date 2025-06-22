@@ -1,4 +1,4 @@
-﻿namespace GameSync.Domain.Shared.Commands;
+﻿namespace GameSync.Application.Shared.Commands;
 
 /// <summary>
 /// Shared command result object.

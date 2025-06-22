@@ -1,4 +1,4 @@
-using GameSync.Domain.Shared.Commands;
+using GameSync.Application.Shared.Commands;
 
 namespace GameSync.Application.EmailInfrastructure;
 
