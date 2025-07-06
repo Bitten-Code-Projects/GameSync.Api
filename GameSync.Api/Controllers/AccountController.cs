@@ -1,11 +1,12 @@
-﻿using GameSync.Application.Account.Dtos;
+﻿using GameSync.Api.Utilities;
+using GameSync.Application.Account.Dtos;
 using GameSync.Application.Account.UseCases.RegisterUser;
 using GameSync.Infrastructure.Context.Models;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-namespace GameSync.Api.Controllers
+namespace GameSync.Api.Controllers.AccountController
 {
     /// <summary>
     /// The AccountController handles all user account related operations.
@@ -76,8 +77,8 @@ namespace GameSync.Api.Controllers
         {
             var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
 
-            var safeEmail = dto.Email.Replace("\n", string.Empty).Replace("\r", string.Empty);
-            var safeUserName = dto.Login.Replace("\n", string.Empty).Replace("\r", string.Empty);
+            var safeEmail = dto.Email.LogsSanitize();
+            var safeUserName = dto.Login.LogsSanitize();
 
             _logger.LogInformation(
                 "[User Registration] Attempt: Email={Email}, IP={IP}, Username={Username}",
@@ -107,7 +108,7 @@ namespace GameSync.Api.Controllers
 
             // ToDo: Send email to activate account. (waiting for sending email feature)
 
-            return Ok(new { message = "User registered successfully." });
+            return NoContent();
         }
     }
 }
