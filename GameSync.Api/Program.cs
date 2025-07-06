@@ -4,9 +4,12 @@ using System.Reflection;
 using FluentValidation;
 using GameSync.Api.Middleware;
 using GameSync.Api.Shared.Middleware;
+using GameSync.Application.Account.Interfaces;
 using GameSync.Application.EmailInfrastructure;
 using GameSync.Infrastructure.Context;
 using GameSync.Infrastructure.Context.Models;
+using GameSync.Infrastructure.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
@@ -46,7 +49,7 @@ public class Program
             x.IncludeScopes = true;
             x.IncludeFormattedMessage = true;
 
-            y.Endpoint = new Uri(Environment.GetEnvironmentVariable("SEQ_API_URL")!);
+            y.Endpoint = new Uri(Environment.GetEnvironmentVariable("SEQ_API_URL") !);
             y.Protocol = OtlpExportProtocol.HttpProtobuf;
             y.Headers = $"X-Seq-ApiKey={Environment.GetEnvironmentVariable("SEQ_API_KEY")}";
         }));
@@ -56,6 +59,7 @@ public class Program
         builder.Services.AddScoped<ISmtpClient, SmtpClientWrapper>();
         builder.Services.AddScoped<IEmailMessageFactory, EmailMessageFactory>();
         builder.Services.AddScoped<IEmailService, EmailService>();
+        builder.Services.AddScoped<IIdentityService, IdentityService>();
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
@@ -100,6 +104,19 @@ public class Program
         builder.Services.AddAutoMapper(applicationAssembly);
 
         builder.Services.AddIdentityApiEndpoints<ApplicationUser>().AddEntityFrameworkStores<AppDbContext>();
+
+        builder.Services.Configure<IdentityOptions>(options =>
+        {
+            options.Password.RequireDigit = true;
+            options.Password.RequireLowercase = true;
+            options.Password.RequireNonAlphanumeric = true;
+            options.Password.RequireUppercase = true;
+            options.Password.RequiredLength = 10;
+
+            options.SignIn.RequireConfirmedEmail = true;
+            options.User.RequireUniqueEmail = true;
+        });
+
         builder.Services.AddAuthorization();
 
         // Load environment variables
@@ -107,11 +124,8 @@ public class Program
         configuration["EmailSettings:AuthLogin"] = Environment.GetEnvironmentVariable("BCP_GS_EMAIL_USER");
         configuration["EmailSettings:SenderEmail"] = Environment.GetEnvironmentVariable("BCP_GS_SENDER");
         builder.Services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
-        builder.Services.AddSingleton<IEmailService, EmailService>();
 
         var app = builder.Build();
-
-        app.MapGroup("/account").MapIdentityApi<ApplicationUser>();
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
