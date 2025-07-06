@@ -4,11 +4,11 @@ using System.Reflection;
 using FluentValidation;
 using GameSync.Api.Middleware;
 using GameSync.Api.Shared.Middleware;
+using GameSync.Application.Account.Interfaces;
 using GameSync.Application.EmailInfrastructure;
-using GameSync.Api.Validators.Account;
-using GameSync.Application.Account.Dtos;
 using GameSync.Infrastructure.Context;
 using GameSync.Infrastructure.Context.Models;
+using GameSync.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
 using OpenTelemetry.Exporter;
@@ -59,6 +59,7 @@ public class Program
         builder.Services.AddScoped<ISmtpClient, SmtpClientWrapper>();
         builder.Services.AddScoped<IEmailMessageFactory, EmailMessageFactory>();
         builder.Services.AddScoped<IEmailService, EmailService>();
+        builder.Services.AddScoped<IIdentityService, IdentityService>();
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
@@ -123,7 +124,6 @@ public class Program
         configuration["EmailSettings:AuthLogin"] = Environment.GetEnvironmentVariable("BCP_GS_EMAIL_USER");
         configuration["EmailSettings:SenderEmail"] = Environment.GetEnvironmentVariable("BCP_GS_SENDER");
         builder.Services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
-        builder.Services.AddSingleton<IEmailService, EmailService>();
 
         var app = builder.Build();
 
