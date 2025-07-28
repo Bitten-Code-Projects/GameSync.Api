@@ -1,5 +1,6 @@
 ﻿using GameSync.Application.Account.Interfaces;
 using GameSync.Application.Account.UseCases.RegisterUser;
+using GameSync.Domain.Shared.Commands;
 using GameSync.Infrastructure.Context.Models;
 using Microsoft.AspNetCore.Identity;
 
@@ -49,6 +50,35 @@ namespace GameSync.Infrastructure.Identity
                 Succeeded = result.Succeeded,
                 Errors = result.Errors.Select(e => e.Description).ToArray(),
             };
+        }
+
+        /// <summary>
+        /// Confirms a user's email address using the provided confirmation code.
+        /// </summary>
+        /// <param name="userId">The unique identifier of the user whose email should be confirmed.</param>
+        /// <param name="code">The email confirmation code (token) returned by the identity system.</param>
+        /// <returns>
+        /// The result indicates whether the email was successfully confirmed.
+        /// If the user cannot be found, a failed <see cref="CommandResult"/>
+        /// is returned containing the message "User not found." or if the confirmation fails, a failed
+        /// <see cref="CommandResult"/> is returned with the first error description from the identity result.
+        /// </returns>
+        public async Task<CommandResult> ConfirmEmailAsync(
+            string userId,
+            string code)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user is null)
+            {
+                return CommandResult.Fail("User not found.");
+            }
+
+            var confirmationResult = await _userManager.ConfirmEmailAsync(user, code);
+
+            return confirmationResult.Succeeded
+                ? CommandResult.Success
+                : CommandResult.Fail(confirmationResult.Errors.Select(e => e.Description).First());
         }
     }
 }

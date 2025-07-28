@@ -1,10 +1,13 @@
-﻿using GameSync.Api.Utilities;
+﻿using System.Text;
+using GameSync.Api.Utilities;
 using GameSync.Application.Account.Dtos;
+using GameSync.Application.Account.UseCases.ConfirmEmail;
 using GameSync.Application.Account.UseCases.RegisterUser;
 using GameSync.Infrastructure.Context.Models;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace GameSync.Api.Controllers.AccountController
 {
@@ -109,6 +112,55 @@ namespace GameSync.Api.Controllers.AccountController
             // ToDo: Send email to activate account. (waiting for sending email feature)
 
             return NoContent();
+        }
+
+        /// <summary>
+        /// Endpoint for confirming users email after registration.
+        /// </summary>
+        /// <param name="userId">User's id for email confirmation.</param>
+        /// <param name="code">Email confirmation code.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Ok if succeed or BadRequest with error details.</returns>
+        [HttpGet("confirm-email")]
+        public async Task<IActionResult> ConfirmEmail(
+            [FromQuery] string userId,
+            [FromQuery] string code,
+            CancellationToken cancellationToken)
+        {
+            _logger.LogInformation(
+                "[Email confirmation] Attempt: UserId='{userId}', Code='{Code}'",
+                userId.LogsSanitize(),
+                code.LogsSanitize());
+
+            string decodedCode;
+
+            try
+            {
+                decodedCode = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
+            }
+            catch (FormatException ex)
+            {
+                _logger.LogWarning("[Email confirmation] Wrong email confirmation code format. Details: {Message}.", ex.Message);
+                return BadRequest();
+            }
+
+            var command = new ConfirmEmailCommand(
+                userId,
+                decodedCode);
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            if (result.IsSuccess)
+            {
+                return Ok();
+            }
+
+            _logger.LogInformation(
+                "[Email confirmation] Email confirmation failed for user: '{userId}'. Errors: {Errors}",
+                userId,
+                result.FailureReason);
+
+            return BadRequest(result.FailureReason);
         }
     }
 }

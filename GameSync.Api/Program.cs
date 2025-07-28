@@ -103,7 +103,10 @@ public class Program
         builder.Services.AddDbContext<AppDbContext>();
         builder.Services.AddAutoMapper(applicationAssembly);
 
-        builder.Services.AddIdentityApiEndpoints<ApplicationUser>().AddEntityFrameworkStores<AppDbContext>();
+        builder.Services
+            .AddIdentityApiEndpoints<ApplicationUser>()
+            .AddEntityFrameworkStores<AppDbContext>()
+            .AddDefaultTokenProviders();
 
         builder.Services.Configure<IdentityOptions>(options =>
         {
