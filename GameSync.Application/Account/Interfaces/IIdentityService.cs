@@ -19,5 +19,18 @@ namespace GameSync.Application.Account.Interfaces
         /// A <see cref="RegisterResult"/> indicating the outcome of the registration operation, including success state and error information if applicable.
         /// </returns>
         Task<RegisterResult> RegisterAsync(string userName, string email, string password, string? lastIp);
+
+        /// <summary>
+        /// Confirms a user's email address using the provided confirmation code.
+        /// </summary>
+        /// <param name="userId">The unique identifier of the user whose email should be confirmed.</param>
+        /// <param name="code">The email confirmation code (token) returned by the identity system.</param>
+        /// <returns>
+        /// The result indicates whether the email was successfully confirmed.
+        /// If the user cannot be found, a failed <see cref="CommandResult"/>
+        /// is returned containing the message "User not found." or if the confirmation fails, a failed
+        /// <see cref="CommandResult"/> is returned with the first error description from the identity result.
+        /// </returns>
+        Task<CommandResult> ConfirmEmailAsync(string userId, string code);
     }
 }
